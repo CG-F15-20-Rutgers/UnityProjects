@@ -48,10 +48,7 @@ public class MouseSelectionScript : MonoBehaviour {
                     bool ClickedNavMesh = NavMesh.SamplePosition(hit.point, out navMeshHit, 0.1f, NavMesh.AllAreas);
                     if (ClickedNavMesh)
                     {
-                        //TODO: Director Script
-                        // Send navMeshHit.position to director script, and call SetDestination on all
-                        // "Selected" navMeshAgents ****ONLY ONCE****!!!!!!!
-                        // Do not call in an update function.
+                        DirectorScript.DirectAgents(navMeshHit.position);
                     }
                 }
             }
