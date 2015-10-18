@@ -3,10 +3,8 @@ using System.Collections;
 
 public class MouseSelectionScript : MonoBehaviour {
 
-	// Use this for initialization
-	void Start () {
-	
-	}
+    public Material activeObstacleMaterial;
+    public Material inactiveObstacleMaterial;
 	
 	// Update is called once per frame
 	void Update () {
@@ -40,6 +38,16 @@ public class MouseSelectionScript : MonoBehaviour {
                             break;
                         }
                     }
+                }
+                else if (targGameObject.CompareTag("MoveableObstacle"))
+                {
+                    targGameObject.tag = "ObstaclesToMove";
+                    targGameObject.GetComponent<Renderer>().sharedMaterial = activeObstacleMaterial;
+                }
+                else if (targGameObject.CompareTag("ObstaclesToMove"))
+                {
+                    targGameObject.tag = "MoveableObstacle";
+                    targGameObject.GetComponent<Renderer>().sharedMaterial = inactiveObstacleMaterial;
                 }
                 else
                 {
