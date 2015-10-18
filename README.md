@@ -1,9 +1,9 @@
-#CG-F15-20-Rutgers
+#Dem Saints
 ######Unity Projects - CG Fall 2015 @ Rutgers
-######By: *[David Goldman], [Anish Goyal], [Renish Matta], [Vivek Seth]*
+######By: *David Goldman, Anish Goyal, Renish Matta, Vivek Seth*
 Check out our website: [Group Name Website](https://www.google.com "Google's Homepage!")
 
-![alt text](teamLogo.png)
+![how 'bout Dem Saints](demsaints.svg)
 
 ###B1: Navigation and Animation
 1. I am a fun project!
