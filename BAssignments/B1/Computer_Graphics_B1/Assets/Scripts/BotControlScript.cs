@@ -65,7 +65,7 @@ public class BotControlScript : MonoBehaviour
 				// Vector3 upVector = Vector3.up * jump * 25f * 0.3f * Time.deltaTime;
 				// Vector3 movementVector = anim.velocity * Time.deltaTime;
 				// transform.Translate (movementVector + upVector, Space.World);
-				rb.AddForce(new Vector3(0.0f, 50.0f * 100f, 0.0f));
+				rb.AddForce(new Vector3(0.0f, 50.0f * 75f, 0.0f));
 			}
 		}
 		else if (currentBaseState.nameHash == fallState)
@@ -84,6 +84,6 @@ public class BotControlScript : MonoBehaviour
 
 	// Note: hardcoded height for player, please be advised if player model is changed that this should be updated.
 	private bool IsFreeFalling() {
-		return !Physics.Raycast (transform.position, new Vector3(0.0f, -1.0f, 0.0f), 1f);
+		return !Physics.Raycast (transform.position, new Vector3(0.0f, -1.0f, 0.0f), 1.1f);
 	}
 }
