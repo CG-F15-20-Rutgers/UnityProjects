@@ -3,7 +3,7 @@
 ######By: *David Goldman, Anish Goyal, Renish Matta, Vivek Seth*
 Check out our website: [Group Name Website](https://www.google.com "Google's Homepage!")
 
-![how 'bout Dem Saints](demsaints.png)
+![how 'bout Dem Saints](demsaints.png){:height="100px" width="100px"}
 
 ###B1: Navigation and Animation
 1. I am a fun project!
