@@ -11,6 +11,8 @@ public class DirectorScript : MonoBehaviour {
         GameObject[] selectedObjects = GameObject.FindGameObjectsWithTag("ObstaclesToMove");
         foreach (GameObject gameObject in selectedObjects) {
             Vector3 movement = new Vector3(HorizontalObstacleMove, 0, VerticalObstacleMove);
+            // Adjust movement to be forward-facing
+            movement = transform.rotation * movement;
             gameObject.GetComponent<Rigidbody>().freezeRotation = true;
             gameObject.GetComponent<Rigidbody>().velocity = (movement * 10);
         }
