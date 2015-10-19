@@ -26,6 +26,7 @@ public class DirectorScript : MonoBehaviour {
         foreach (GameObject gameObject in selectedObjects) {
             NavMeshAgent meshAgent = gameObject.GetComponent<NavMeshAgent>();
             meshAgent.SetDestination(target);
+            if (partThree) meshAgent.speed = speed;
         }
     }
 }

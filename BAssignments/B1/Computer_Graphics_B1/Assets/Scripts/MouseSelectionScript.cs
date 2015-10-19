@@ -7,24 +7,12 @@ public class MouseSelectionScript : MonoBehaviour {
     public Material inactiveObstacleMaterial;
     public bool isPartThree;
 
-    private float LastClickTime;
-    private bool IsClicked;
-
-    void Start()
-    {
-        IsClicked = false;
-        LastClickTime = 0;
-    }
 	
 	// Update is called once per frame
 	void Update () {
-        bool DoubleClick = false;
+        bool shiftMod = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift); 
         if (Input.GetMouseButtonDown(0))
         {
-            // Check for dbl click
-            IsClicked = true;
-            if (Time.time - LastClickTime < 2) DoubleClick = true;
-
             RaycastHit hit;
             Ray ray = gameObject.GetComponent<Camera>().ScreenPointToRay(Input.mousePosition);
             if (Physics.Raycast(ray, out hit))
@@ -71,16 +59,9 @@ public class MouseSelectionScript : MonoBehaviour {
                     bool ClickedNavMesh = NavMesh.SamplePosition(hit.point, out navMeshHit, 0.1f, NavMesh.AllAreas);
                     if (ClickedNavMesh)
                     {
-                        DirectorScript.DirectAgents(navMeshHit.position, isPartThree, (DoubleClick)? 0.3f : 0.7f);
+                        float speed = (shiftMod) ? 0.7f : 0.1f;
+                        DirectorScript.DirectAgents(navMeshHit.position, isPartThree, speed);
                     }
-                }
-            }
-            else
-            {
-                if (IsClicked)
-                {
-                    LastClickTime = Time.time;
-                    IsClicked = false;
                 }
             }
         }
