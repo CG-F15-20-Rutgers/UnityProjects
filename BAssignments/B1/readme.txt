@@ -7,7 +7,7 @@ Post: <TODO -insert->
 
 Documentation:
 B1: Navigation and Animation
-This is a fun project meant meant as an introduction to Unity's navigation and animation system. We leverage these systems in order to build a simple crowd simulator, where you control humanoid robots in a complex environment. You can even move obstacles in and out of the robotÎéÎ÷s way and their path will be updated accordingly.    
+This is a fun project meant meant as an introduction to Unity's navigation and animation system. We leverage these systems in order to build a simple crowd simulator, where you control humanoid robots in a complex environment. You can even move obstacles in and out of a robot's way and their path will be updated accordingly.    
 
 
 There are 3 components to this project: 
@@ -23,7 +23,7 @@ There are 3 components to this project:
 
    * Part 2: Walk, Run, and Jump around as a humanoid robot.
       * Features:
-         * Using UnityÎéÎ÷s Animation system, we made a player controlled humanoid robot. He has animations for walking, running, and jumping.
+         * Using Unity's Animation system, we made a player controlled humanoid robot. He has animations for walking, running, and jumping.
       * Controls:
          * Move via WASD key
          * Run with SHIFT
