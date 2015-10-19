@@ -31,6 +31,7 @@ public class RobotController : MonoBehaviour {
         {
             if (!isJumping)
             {
+                animator.SetBool("NavMeshJump", true);
                 isJumping = true;
                 time = 0.0f;
             }
@@ -38,15 +39,17 @@ public class RobotController : MonoBehaviour {
             {
                 time += Time.deltaTime;
             }
-            float normal = time / 0.4f;
-            Vector3 pos = Vector3.Slerp(agent.currentOffMeshLinkData.startPos, agent.currentOffMeshLinkData.endPos, normal);
+            float normal = time / 2.3f;
+            Vector3 pos = Vector3.Lerp(agent.currentOffMeshLinkData.startPos, agent.currentOffMeshLinkData.endPos, normal);
+            pos.y += Mathf.Sin(Mathf.PI * time / 2.3f);
             transform.position = pos;
-            if (time >= 0.4f)
+            if (time >= 2.3f)
             {
                 transform.position = agent.currentOffMeshLinkData.endPos;
                 agent.CompleteOffMeshLink();
                 agent.Resume();
                 isJumping = false;
+                animator.SetBool("NavMeshJump", false);
             }
         }
 	}
