@@ -6,8 +6,38 @@ Blog: https://medium.com/@CG.F15.20.Rutgers
 Post: <TODO -insert->
 
 Documentation:
+B1: Navigation and Animation
+This is a fun project meant meant as an introduction to Unity's navigation and animation system. We leverage these systems in order to build a simple crowd simulator, where you control humanoid robots in a complex environment. You can even move obstacles in and out of the robotÎéÎ÷s way and their path will be updated accordingly.    
+
+
+There are 3 components to this project: 
+
+   * Part 1: Navigate capsules + move obstacles.
+      * Features:
+         * Using Unity's NavMeshAgent system, we made it possible to move agents by clicking on them and then clicking on a surface where you want them to go.
+      * Controls:
+         * WASD + Q/E to control the camera. Arrow keys to move selected obstacles.
+         * Select and deselect agents/obstacles by clicking on them
+            1. Move selected agents by clicking on where you want them to go
+            2. Move selected obstacles via the arrow keys
+
+   * Part 2: Walk, Run, and Jump around as a humanoid robot.
+      * Features:
+         * Using UnityÎéÎ÷s Animation system, we made a player controlled humanoid robot. He has animations for walking, running, and jumping.
+      * Controls:
+         * Move via WASD key
+         * Run with SHIFT
+         * SPACE to jump
+
+   * Part 3: Navigate humanoid robots around the map
+      * Features:
+         * Combining the two features above, we have a group of robots that are able to navigate around the world in a natural way, with smooth animations.
+
 
 Extra Credit Attempts:
+1. We've integrated the 3 scenes (all 3 parts) into one single demo with a game menu
+allowing users to navigate between part 1, 2, and 3.
+
 
 Answers to Questions:
 8. When carving is used, the area taken up by the obstacle will be removed (carved out) of the
