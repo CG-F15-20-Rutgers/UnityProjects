@@ -19,6 +19,7 @@ public class BotControlScript : MonoBehaviour
 	static int locoState = Animator.StringToHash("Base Layer.Locomotion");
 	static int jumpDownanimState = Animator.StringToHash("Base Layer.JumpDown");
 	static int fallState = Animator.StringToHash("Base Layer.Fall");
+	static int jump0State = Animator.StringToHash("Base Layer.Jump 0");
 	// static int rollState = Animator.StringToHash("Base Layer.Roll");
 
 	public float JumpSpeed;
@@ -61,24 +62,24 @@ public class BotControlScript : MonoBehaviour
 	
 		if (currentBaseState.nameHash == locoState) {
 			if (jump > 0) {
-				anim.SetBool ("Jump", true);
+				anim.SetBool ("Jump2", true);
 				// Vector3 upVector = Vector3.up * jump * 25f * 0.3f * Time.deltaTime;
 				// Vector3 movementVector = anim.velocity * Time.deltaTime;
 				// transform.Translate (movementVector + upVector, Space.World);
-				rb.AddForce(new Vector3(0.0f, 50.0f * 75f, 0.0f));
+				// rb.AddForce(new Vector3(0.0f, 2812.5f, 0.0f));
 			}
 		}
-		else if (currentBaseState.nameHash == fallState)
+		else if (currentBaseState.nameHash == jump0State)
 		{
-			if (!IsFreeFalling ())
+			if (!anim.IsInTransition(0))
 			{
 				// Once we're done free falling, we must set Jump to false. This stops the animation, and brings the character back to the Locomotion state. 
-				anim.SetBool ("Jump", false);
-				anim.CrossFade(idleState, 0.0f);
+				anim.SetBool ("Jump2", false);
+				// anim.CrossFade(idleState, 0.0f);
 			}
 		} else if (currentBaseState.nameHash == idleState) {
 			// Jumping and idle states are mutually exclusive. Set Jump to false to ensure we maintain mutual exclusivity.
-			anim.SetBool("Jump", false);
+			anim.SetBool("Jump2", false);
 		}
 	}
 
