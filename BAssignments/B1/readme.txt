@@ -23,7 +23,7 @@ There are 3 components to this project:
 
    * Part 2: Walk, Run, and Jump around as a humanoid robot.
       * Features:
-         * Using Unity's Animation system, we made a player controlled humanoid robot. He has animations for walking, running, and jumping.
+         * Using Unity's Animation system, we made a player controlled humanoid robot. He has animations for walking (forward and backward), running, and jumping.
       * Controls:
          * Move via WASD key
          * Run with SHIFT
@@ -37,6 +37,8 @@ There are 3 components to this project:
 Extra Credit Attempts:
 1. We've integrated the 3 scenes (all 3 parts) into one single demo with a game menu
 allowing users to navigate between part 1, 2, and 3.
+2. Our character can walk backwards (press the S key in part 2)
+3. Our character uses a backflip animation for jumping in Part 2. 
 
 
 Answers to Questions:
