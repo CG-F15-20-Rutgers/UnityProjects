@@ -14,7 +14,7 @@ There are 3 components to this project:
 
    * Part 1: Navigate capsules + move obstacles.
       * Features:
-         * Using UnityÎéÎ÷s NavMeshAgent system, we made it possible to move agents by clicking on them and then clicking on a surface where you want them to go.
+         * Using Unity's NavMeshAgent system, we made it possible to move agents by clicking on them and then clicking on a surface where you want them to go.
       * Controls:
          * WASD + Q/E to control the camera. Arrow keys to move selected obstacles.
          * Select and deselect agents/obstacles by clicking on them
@@ -35,6 +35,9 @@ There are 3 components to this project:
 
 
 Extra Credit Attempts:
+1. We've integrated the 3 scenes (all 3 parts) into one single demo with a game menu
+allowing users to navigate between part 1, 2, and 3.
+
 
 Answers to Questions:
 8. When carving is used, the area taken up by the obstacle will be removed (carved out) of the
