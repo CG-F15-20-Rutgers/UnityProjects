@@ -1,7 +1,7 @@
 #Dem Saints
 ######Unity Projects - CG Fall 2015 @ Rutgers
 ######By: *David Goldman, Anish Goyal, Renish Matta, Vivek Seth*
-Check out our website: [Group Name Website](https://www.google.com "Google's Homepage!")
+Check out our website: [https://medium.com/@CG.F15.20.Rutgers](https://medium.com/@CG.F15.20.Rutgers "Dem Saints' Blog!")
 
 ![how 'bout Dem Saints](demsaints.png)
 
