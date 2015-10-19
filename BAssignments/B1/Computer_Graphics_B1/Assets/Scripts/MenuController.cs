@@ -4,10 +4,10 @@ using System.Collections;
 
 public class MenuController : MonoBehaviour {
 
-    public Button part1Button;
-    public Button part2Button;
-    public Button part3Button;
-    public Button quitButton;
+    public Button part1Button = null;
+    public Button part2Button = null;
+    public Button part3Button = null;
+    public Button quitButton = null;
 
 	// Use this for initialization
 	void Start () {
@@ -24,21 +24,21 @@ public class MenuController : MonoBehaviour {
 
     public void loadPart1()
     {
-        Application.LoadLevel("Part1-Scene");
+        Application.LoadLevel(1);
     }
 
     public void loadPart2()
     {
-        Application.LoadLevel("Part2-Scene");
+        Application.LoadLevel(2);
     }
 
     public void loadPart3()
     {
-        Application.LoadLevel("Part3-Scene");
+        Application.LoadLevel(3);
     }
 
     public void quit()
     {
-        Application.LoadLevel("Menu");
+        Application.LoadLevel(0);
     }
 }

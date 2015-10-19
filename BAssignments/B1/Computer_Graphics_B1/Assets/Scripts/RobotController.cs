@@ -10,6 +10,7 @@ public class RobotController : MonoBehaviour {
     private float previousYRotation;
     private bool isJumping;
     private float time;
+    private Vector3 jumpStart;
 
 	// Use this for initialization
 	void Start () {
@@ -31,19 +32,19 @@ public class RobotController : MonoBehaviour {
         {
             if (!isJumping)
             {
-                animator.SetBool("NavMeshJump", true);
+                animator.CrossFade(Animator.StringToHash("Base Layer.Jump Across"), 0.0f);
                 isJumping = true;
                 time = 0.0f;
+                jumpStart = transform.position;
             }
             else
             {
                 time += Time.deltaTime;
             }
-            float normal = time / 2.3f;
-            Vector3 pos = Vector3.Lerp(agent.currentOffMeshLinkData.startPos, agent.currentOffMeshLinkData.endPos, normal);
-            pos.y += Mathf.Sin(Mathf.PI * time / 2.3f);
+            float normal = time / 0.867f;
+            Vector3 pos = Vector3.Lerp(jumpStart, agent.currentOffMeshLinkData.endPos, normal);
             transform.position = pos;
-            if (time >= 2.3f)
+            if (time >= 0.867f)
             {
                 transform.position = agent.currentOffMeshLinkData.endPos;
                 agent.CompleteOffMeshLink();
