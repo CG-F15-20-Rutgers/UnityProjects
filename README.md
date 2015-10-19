@@ -5,7 +5,7 @@ Check out our website: [https://medium.com/@CG.F15.20.Rutgers](https://medium.co
 
 ![how 'bout Dem Saints](demsaints.png)
 
-###B1: Navigation and Animation
+###B1: [Navigation and Animation](https://medium.com/@CG.F15.20.Rutgers/unity-navigation-and-animation-f650be55fc5a)
 1. This is a fun project meant to explore Unity's navigation and animation systems.
 2. Features
   * Part 1: Navigate capsules + move obstacles.

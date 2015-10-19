@@ -3,7 +3,7 @@ b1 - Unity: Navigation & Animation
 https://github.com/CG-F15-20-Rutgers/UnityProjects
 
 Blog: https://medium.com/@CG.F15.20.Rutgers
-Post: <TODO -insert->
+Post: https://medium.com/@CG.F15.20.Rutgers/unity-navigation-and-animation-f650be55fc5a
 
 Documentation:
 B1: Navigation and Animation
