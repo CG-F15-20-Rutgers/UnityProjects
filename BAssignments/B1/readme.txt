@@ -32,6 +32,8 @@ There are 3 components to this project:
    * Part 3: Navigate humanoid robots around the map
       * Features:
          * Combining the two features above, we have a group of robots that are able to navigate around the world in a natural way, with smooth animations.
+		 * As an added bonus, when moving robots around the scene, holding shift while clicking will make the robots run. Clicking without shift will still move
+		   the robots, albeit at a slower pace.
 
 
 Extra Credit Attempts:
