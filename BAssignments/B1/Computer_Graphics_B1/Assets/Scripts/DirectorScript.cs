@@ -3,6 +3,8 @@ using System.Collections;
 
 public class DirectorScript : MonoBehaviour {
 
+    private float agentSpeed;
+
     // Called every frame
     public void FixedUpdate()
     {
@@ -19,7 +21,7 @@ public class DirectorScript : MonoBehaviour {
     }
 
     // To be called by the MouseSelectionScript.
-    public static void DirectAgents(Vector3 target) {
+    public static void DirectAgents(Vector3 target, bool partThree, float speed) {
         GameObject[] selectedObjects = GameObject.FindGameObjectsWithTag("Selected");
         foreach (GameObject gameObject in selectedObjects) {
             NavMeshAgent meshAgent = gameObject.GetComponent<NavMeshAgent>();
