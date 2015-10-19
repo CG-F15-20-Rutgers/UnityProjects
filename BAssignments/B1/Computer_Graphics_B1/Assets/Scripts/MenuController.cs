@@ -14,7 +14,7 @@ public class MenuController : MonoBehaviour {
         if(part1Button) part1Button.onClick.AddListener(loadPart1);
         if(part2Button) part2Button.onClick.AddListener(loadPart2);
         if(part3Button) part3Button.onClick.AddListener(loadPart3);
-        if(quitButton) quitButton.onClick.AddListener(quit);
+        if(quitButton) quitButton.onClick.AddListener(loadMenu);
 	}
 	
 	// Update is called once per frame
@@ -37,8 +37,9 @@ public class MenuController : MonoBehaviour {
         Application.LoadLevel(3);
     }
 
-    public void quit()
+    public void loadMenu()
     {
+        Debug.Log("Throwing to main menu");
         Application.LoadLevel(0);
     }
 }
