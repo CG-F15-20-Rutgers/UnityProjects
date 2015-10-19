@@ -27,7 +27,7 @@ There are 3 components to this project:
       * Controls:
          * Move via WASD key
          * Run with SHIFT
-         * SPACE to jump
+         * SPACE to jump (only works if you are moving forward)
 
    * Part 3: Navigate humanoid robots around the map
       * Features:
