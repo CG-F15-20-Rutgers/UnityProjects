@@ -24,17 +24,12 @@ these systems in order to build a simple crowd simulator, where you control huma
 complex environment. You can even move obstacles in and out of the robots' way and their path will
 be updated accordingly.
 
-###B2: Inverse Kinematics
-1. I am a hard project!
+###B2: Behavior Trees
+1. This project uses the KADAPT library for Unity in order to create a story using behavior trees and inverse kinematics...
 2. Features
 3. Description
 
-###B3: Behavior Trees
-1. I am a cool project!
-2. Features
-3. Description
-
-###B4: Interactive Narrative Game
+###B3: Interactive Narrative Game
 1. I am a real project!
 2. Features
 3. Description
