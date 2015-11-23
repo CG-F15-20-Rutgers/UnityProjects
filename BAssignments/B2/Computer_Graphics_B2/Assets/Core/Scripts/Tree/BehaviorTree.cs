@@ -37,7 +37,9 @@ public class BehaviorTree : MonoBehaviour {
 	}
 
 	protected Node IntroTree() {
-		return new Sequence(MaintainEyeContactWhileConversing(follower1, follower2, eyeHeight));
+		Val<Vector3> target = Val.V(() => (follower1.transform.position + follower2.transform.position) / 2);
+		float distance = 1.0f;
+		return new Sequence(ApproachAndOrient(follower1, follower2, target, distance), MaintainEyeContactWhileConversing(follower1, follower2, eyeHeight));
 	}
 
 	protected Node MaintainEyeContact(GameObject a, GameObject b, Vector3 eyeHeight) {
@@ -59,8 +61,8 @@ public class BehaviorTree : MonoBehaviour {
 		Val<Vector3> p2 = Val.V(() => b.transform.position);
 		return new Sequence(new SequenceParallel(mec(a).Node_GoToUpToRadius(target, distance),
 		                                         mec(b).Node_GoToUpToRadius(target, distance)),
-		                    new SequenceParallel(mec(a).Node_OrientTowards(p1),
-		                     					 mec(b).Node_OrientTowards(p2)));
+		                    new SequenceParallel(mec(a).Node_OrientTowards(p2),
+		                     					 mec(b).Node_OrientTowards(p1)));
 	}
 
 
