@@ -45,11 +45,11 @@ public class BehaviorTree : MonoBehaviour {
 	protected Node MaintainEyeContact(GameObject a, GameObject b, Vector3 eyeHeight) {
 		Val<Vector3> p1Head = Val.V(() => a.transform.position + eyeHeight);
 		Val<Vector3> p2Head = Val.V(() => b.transform.position + eyeHeight);
-		return new SequenceParallel(mec(a).Node_HeadLook(p2Head), mec(b).Node_HeadLook(p1Head));
+		return new DecoratorLoop(new SequenceParallel(mec(a).Node_HeadLook(p2Head), mec(b).Node_HeadLook(p1Head)));
 	}
 
 	protected Node Converse(GameObject a, GameObject b) {
-		return new Sequence(Gesture(a, "a"), Gesture(b, "b"), Gesture(a, "c"), Gesture(b, "d"));
+		return new Sequence(Gesture(a, "WAVE"), Gesture(b, "CHEER"), Gesture(a, "CRY"), Gesture(b, "SHOCK"));
 	}
 
 	protected Node MaintainEyeContactWhileConversing(GameObject a, GameObject b, Vector3 eyeHeight) {
