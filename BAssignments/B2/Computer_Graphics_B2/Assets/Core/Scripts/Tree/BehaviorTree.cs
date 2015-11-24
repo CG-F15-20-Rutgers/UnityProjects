@@ -90,11 +90,12 @@ public class BehaviorTree : MonoBehaviour {
     protected Node PushButton(GameObject thief, GameObject button, Vector3 buttonHeight, Val<float> distance)
     {
         Val<Vector3> target = Val.V(() => button.transform.position + buttonHeight);
-
+        return null;
+        /*
         //TODO: Implement PushButton
         return new Sequence(mec(thief).Node_GoToUpToRadius(target, distance),
                             mec(thief).Node_HeadLook(target),
-                            mec(thief).PushButtonObject(button));
+                            mec(thief).PushButtonObject(button));*/
     }
 
     protected Node ApproachAndOrientTarget(GameObject a, Val<Vector3> target, Val<float> distance) {
