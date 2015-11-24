@@ -80,7 +80,7 @@ public class BehaviorTree : MonoBehaviour {
 
 		                    Speak(a, "Yes, but we will need to kill the guards", "CUTTHROAT"),
 
-		                    Speak(b, "Okay, lets do it!", "CHEER"),);
+		                    Speak(b, "Okay, lets do it!", "CHEER"));
     }
 
     protected Node MaintainEyeContactWhileConversing(GameObject a, GameObject b, Vector3 eyeHeight) {
