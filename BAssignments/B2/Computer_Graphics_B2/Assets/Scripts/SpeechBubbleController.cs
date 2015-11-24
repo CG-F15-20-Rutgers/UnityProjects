@@ -50,6 +50,8 @@ public class SpeechBubbleController : MonoBehaviour {
         this.message = message;
         currTime = timeToDisplaySpeechBubble;
         isBubbleVisible = true;
+
+        Debug.Log(message);
     }
 
     public bool IsBubbleVisible()

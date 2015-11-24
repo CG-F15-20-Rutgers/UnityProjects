@@ -33,6 +33,10 @@ public class BehaviorTree : MonoBehaviour {
         return mec(g).ST_PlayHandGesture(gestureName, gestureDuration);
     }
 
+	protected Node Speak(GameObject g, string message, string gestureName) {
+		return mec(g).ST_DisplaySpeechBubble (message, gestureName, gestureDuration);
+	}
+
     protected Node BuildTreeRoot() {
         return new Sequence(IntroTree());
     }
@@ -50,7 +54,7 @@ public class BehaviorTree : MonoBehaviour {
     }
 
     protected Node Converse(GameObject a, GameObject b) {
-        return new Sequence(Gesture(a, "WAVE"), Gesture(b, "CHEER"), Gesture(a, "CRY"), Gesture(b, "SHOCK"));
+		return new Sequence(Speak(a, "hello world!", "WAVE"), Gesture(b, "CHEER"), Gesture(a, "CRY"), Gesture(b, "SHOCK"));
     }
 
     protected Node MaintainEyeContactWhileConversing(GameObject a, GameObject b, Vector3 eyeHeight) {

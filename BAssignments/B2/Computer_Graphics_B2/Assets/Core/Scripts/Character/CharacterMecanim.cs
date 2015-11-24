@@ -273,6 +273,13 @@ public class CharacterMecanim : MonoBehaviour
         this.Body.HeadLookStop();
 		return RunStatus.Success;
 	}
+
+    public virtual RunStatus DisplaySpeechBubble(string message)
+    {
+        GetComponent<SpeechBubbleController>().DisplaySpeechBubble(message);
+        return RunStatus.Success;
+    }
+
     #endregion
 
     #region Animation Commands
