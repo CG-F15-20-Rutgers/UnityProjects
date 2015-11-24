@@ -54,7 +54,13 @@ public class BehaviorTree : MonoBehaviour {
     }
 
     protected Node Converse(GameObject a, GameObject b) {
-		return new Sequence(Speak(a, "hello world!", "WAVE"), Gesture(b, "CHEER"), Gesture(a, "CRY"), Gesture(b, "SHOCK"));
+		return new Sequence(Speak(b, "Hello!", "WAVE"),
+		                    new LeafWait(Val.V<long>((long)3500.0)),
+							Speak(a, "Let's attack the guards!", "CRY"), 
+		                    new LeafWait(Val.V<long>((long)3500.0)),
+		                    Gesture(a, "SHOCK"), 
+		                    new LeafWait(Val.V<long>((long)3500.0)),
+		                    Gesture(b, "CHEER"));
     }
 
     protected Node MaintainEyeContactWhileConversing(GameObject a, GameObject b, Vector3 eyeHeight) {
