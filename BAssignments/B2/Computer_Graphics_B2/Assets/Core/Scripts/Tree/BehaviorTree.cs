@@ -134,7 +134,7 @@ public class BehaviorTree : MonoBehaviour {
         return new ForEach<GameObject>(PrayArcFactory, guys);
     }
 
-    protected Wave[] getWaves()
+    private Wave[] getWaves()
     {
         GameObject[] guardPosts = GameObject.FindGameObjectsWithTag("GuardPost");
         Array.Sort(guardPosts, new WaveCompare());
@@ -162,7 +162,7 @@ public class BehaviorTree : MonoBehaviour {
         }
     }
 
-    protected GameObject[] getChildrenForWave(Wave wave, bool isGuards)
+    private GameObject[] getChildrenForWave(Wave wave, bool isGuards)
     {
         GameObject waveGameObject;
         string tag;
