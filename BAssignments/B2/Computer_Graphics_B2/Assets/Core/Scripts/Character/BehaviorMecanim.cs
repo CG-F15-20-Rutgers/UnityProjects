@@ -222,6 +222,10 @@ public class BehaviorMecanim : MonoBehaviour
             () => this.Character.BodyAnimation(gestureName, false));
     }
 
+    public Node Node_SpeechBubble(Val<string> message)
+    {
+        return new LeafInvoke(() => this.Character.DisplaySpeechBubble(message.Value));
+    }
 
     #endregion
 
@@ -307,5 +311,15 @@ public class BehaviorMecanim : MonoBehaviour
             new Sequence(
                 new LeafInvoke(turn, stopTurning));
     }
+
+    /// <summary>
+    /// Has characher show speech bubble
+    /// </summary>
+    public Node ST_DisplaySpeechBubble(
+        Val<string> message, Val<string> handGesture, Val<long> duration)
+    {
+        return new Race(ST_PlayHandGesture(handGesture, duration), Node_SpeechBubble(message));
+    }
+
     #endregion
 }
