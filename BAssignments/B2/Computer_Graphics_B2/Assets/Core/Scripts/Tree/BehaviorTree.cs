@@ -134,23 +134,36 @@ public class BehaviorTree : MonoBehaviour {
         return new ForEach<GameObject>(PrayArcFactory, guys);
     }
 
-    protected GameObject[] getGuards()
+    protected GameObject[] getWaves(string tag)
     {
-        GameObject[] guardList = GameObject.FindGameObjectsWithTag("Guard");
-        Array.Sort(guardList, new GuardCompare());
-        return null;
+        GameObject[] waveList = GameObject.FindGameObjectsWithTag(tag);
+        Array.Sort(waveList, new WaveCompare());
+        return waveList;
     }
 
-    private class GuardCompare : IComparer
+    private class WaveCompare : IComparer
     {
         int IComparer.Compare(object a, object b)
         {
-            GameObject guardA = (GameObject)a;
-            GameObject guardB = (GameObject)b;
-            if (guardA.transform.parent.position.z > guardB.transform.parent.position.z) return 1;
-            else if (guardA.transform.parent.position.z < guardB.transform.parent.position.z) return -1;
+            GameObject waveA = (GameObject)a;
+            GameObject waveB = (GameObject)b;
+            if (waveA.transform.position.z > waveB.transform.position.z) return 1;
+            else if (waveA.transform.position.z < waveB.transform.position.z) return -1;
             else return 0;
         }
+    }
+
+    protected GameObject[] getGuardsForWave(GameObject wave)
+    {
+        ArrayList list = new ArrayList();
+        foreach (Transform child in wave.transform)
+        {
+            if (child.CompareTag("Guard"))
+            {
+                list.Add(child.gameObject);
+            }
+        }
+        return (GameObject[])list.ToArray();
     }
 
 
