@@ -126,21 +126,28 @@ public class IKController : MonoBehaviour
             maxTime = 0.4f;
         }
 
-        public void StartPrayer(Transform egg)
+        public void StartPrayer(Transform character, Transform egg)
         {
             if (state == PrayingIKState.INACTIVE)
             {
+                ObjectController oc = egg.parent.GetComponent<ObjectController>();
+                if (oc) oc.StartPrayer();
+
                 state = PrayingIKState.STARTING;
-                Vector3 target = egg.position - new Vector3(0, 0, 1.5f);
+                Quaternion rotation = Quaternion.LookRotation(egg.position - character.position);
+                Vector3 target = egg.position - (rotation * new Vector3(0, 0, 1.5f));
                 ikSecondary.solver.leftHandEffector.position = target - new Vector3(0.2f, 0, 0);
                 ikSecondary.solver.rightHandEffector.position = target + new Vector3(0.2f, 0, 0);
             }
         }
 
-        public void EndPrayer()
+        public void EndPrayer(Transform egg)
         {
             if (state != PrayingIKState.INACTIVE)
             {
+                ObjectController oc = egg.parent.GetComponent<ObjectController>();
+                if (oc) oc.EndPrayer();
+
                 state = PrayingIKState.RETRACTING;
             }
         }
@@ -653,14 +660,14 @@ public class IKController : MonoBehaviour
         this.lookController.LateUpdate();
     }
 
-    public void StartPrayer(Transform egg)
+    public void StartPrayer(Transform player, Transform egg)
     {
-        this.prayerController.StartPrayer(egg);
+        this.prayerController.StartPrayer(player, egg);
     }
 
-    public void EndPrayer()
+    public void EndPrayer(Transform egg)
     {
-        this.prayerController.EndPrayer();
+        this.prayerController.EndPrayer(egg);
     }
 
     public void PressButton(Transform pinPad)

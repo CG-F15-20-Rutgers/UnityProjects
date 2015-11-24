@@ -5,6 +5,8 @@ public class ObjectController : MonoBehaviour {
 
     Rigidbody eggrb;
     float currTime;
+    int prayerCount;
+    float startY;
 
 	// Use this for initialization
 	void Start () {
@@ -14,19 +16,40 @@ public class ObjectController : MonoBehaviour {
             }
         }
         currTime = 0;
+        prayerCount = 0;
+        startY = transform.position.y;
 	}
+
+    public void StartPrayer()
+    {
+        prayerCount++;
+    }
+    public void EndPrayer()
+    {
+        prayerCount--;
+    }
 	
 	// Update is called once per frame
 	void FixedUpdate () {
 
         // floating egg
-        Vector3 currPos = eggrb.position;
-        float y = currPos.y;
-        float newCurrTime = currTime + (Time.deltaTime) * 3f;
-        y += (Mathf.Sin(newCurrTime) - Mathf.Sin(currTime)) / 3f;
-        currPos.y = y;
-        eggrb.position = currPos;
-        currTime = newCurrTime;
+        if (prayerCount == 0)
+        {
+            Vector3 currPos = eggrb.position;
+            float y = currPos.y;
+            float newCurrTime = currTime + (Time.deltaTime) * 3f;
+            y += (Mathf.Sin(newCurrTime) - Mathf.Sin(currTime)) / 3f;
+            currPos.y = y;
+            eggrb.position = currPos;
+            currTime = newCurrTime;
+        }
+        else
+        {
+            Vector3 pos = eggrb.position;
+            pos.y = startY;
+            eggrb.position = pos;
+            currTime = 0;
+        }
 
         // handle movement
         float Horizontal = Input.GetAxis("Hor2");

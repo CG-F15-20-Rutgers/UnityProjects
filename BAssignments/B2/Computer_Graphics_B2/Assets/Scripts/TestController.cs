@@ -22,13 +22,13 @@ public class TestController : MonoBehaviour {
         if(Input.GetKeyDown(KeyCode.C))
         {
             IKController ikc = GetComponent<IKController>();
-            ikc.StartPrayer(egg.transform);
+            ikc.StartPrayer(gameObject.transform, egg.transform);
         }
 
         if (Input.GetKeyDown(KeyCode.D))
         {
             IKController ikc = GetComponent<IKController>();
-            ikc.EndPrayer();
+            ikc.EndPrayer(egg.transform);
         }
 	
 	}
