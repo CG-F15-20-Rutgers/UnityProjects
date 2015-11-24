@@ -2,6 +2,7 @@
 using System;
 using System.Collections;
 using TreeSharpPlus;
+using System.Collections.Generic;
 
 public class BehaviorTree : MonoBehaviour {
 
@@ -10,6 +11,8 @@ public class BehaviorTree : MonoBehaviour {
     public GameObject leader;
     public Vector3 eyeHeight;
     public GameObject egg;
+    public GameObject[] zealots;
+    Dictionary<GameObject, GameObject> gzMappings = new Dictionary<GameObject, GameObject>();
     public long gestureDuration;
 
     public GameObject guard_l1;
@@ -95,29 +98,64 @@ public class BehaviorTree : MonoBehaviour {
 
     // pragma mark new code.
 
-    /*
-        TODO: Add "GameObject thief1, ... thiefn; and GameObject guard1...guardn; to the list of global vars"
-    */
-    protected Node AttackGuard(GameObject thief, GameObject guard, Val<float> distance)
-    {
-        Val<Vector3> target = Val.V(() => guard.transform.position);
-        int iter = UnityEngine.Random.Range(3, 5);
-        
-        return new Sequence(mec(thief).Node_GoToUpToRadius(target, distance),
-                    new DecoratorLoop(iter,
-                        new Sequence(mec(thief).ST_PlayBodyGesture("NEW_PUNCH", 10),
-                                     mec(guard).ST_PlayBodyGesture("NEW_PUNCH", 10))));
+    protected Node MiddleArc() {
+        Wave[] waves = getWaves();
+        return new Sequence(new ForEach<GameObject>(OpenDoorArc, waves));
     }
 
-    protected Node PushButton(GameObject thief, GameObject button, Vector3 buttonHeight, Val<float> distance)
-    {
-        Val<Vector3> target = Val.V(() => button.transform.position + buttonHeight);
-        return null;
-        /*
-        //TODO: Implement PushButton
-        return new Sequence(mec(thief).Node_GoToUpToRadius(target, distance),
-                            mec(thief).Node_HeadLook(target),
-                            mec(thief).st_PlayBodyGesture(button));*/
+    protected Node OpenDoorArc(Wave wave) {
+        System.Action func = delegate
+        {
+            GameObject[] guards = GetChildrenForWave(wave, true);
+            for(int i = 0; i < guards.Length; i++)
+            {
+                gzMappings.Add(guards[i], zealots[i]);
+            }
+        };
+        //TODO: push buttons component
+        return new Sequence(new LeafInvoke(func),
+                            new ForEach<GameObject>(AttackArc, gzMappings.Keys),
+                            PushButton(wave));
+    }
+
+    protected Node AttackArc(GameObject guard) {
+        GameObject zealot;
+        gzMappings.TryGetValue(guard, out zealot);
+        Val<Vector3> target = Val.V(() => guard.transform.position);
+        int iter = Random.Range(3, 5);
+        float distance = 5.0f;
+
+        // TODO: Implement FancyDeathAnimation
+        return new Sequence(mec(zealot).Node_GoToUpToRadius(target, distance),
+                            new DecoratorLoop(iter,
+                                              new Sequence(mec(zealot).ST_PlayBodyGesture("NEW_PUNCH", 500),
+                                              mec(guard).ST_PlayBodyGesture("NEW_PUNCH", 500))),
+                            mec(guard).FancyDeathAnimation());
+    }
+
+    protected Node PushButton(Wave wave) {
+        GameObject pinPad = (GetChildrenForWave(waveSize, false))[0];
+        NavMeshAgent zealot = zealots[0].GetComponent<NavMeshAgent>();
+        IKController ikc = zealot.GetComponent<IKController>();
+
+        //Part 1
+        zealot.SetDestination(pinPad.transform.position - new Vector3(-1, 0, 1));
+        //Part 2
+        while (true) {
+            if (zealot.pathStatus == NavMeshPathStatus.PathComplete && zealot.remainingDistance == 0)
+            {
+                ikc.PressButton(pinPad.transform);
+                while (true)
+                {
+                    //Part 3
+                    if (!ikc.IsPressingButton())
+                    {
+                        goto end;
+                    }
+                }
+            }
+        }
+        end: {}
     }
 
     protected Node ApproachAndOrientTarget(GameObject a, Val<Vector3> target, Val<float> distance) {
