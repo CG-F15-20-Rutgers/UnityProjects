@@ -39,7 +39,7 @@ public class BehaviorTree : MonoBehaviour {
 
     protected Node IntroTree() {
         Val<Vector3> target = Val.V(() => (follower1.transform.position + follower2.transform.position) / 2);
-        float distance = 1.0f;
+        float distance = 1.5f;
         return new Sequence(ApproachAndOrient(follower1, follower2, target, distance), MaintainEyeContactWhileConversing(follower1, follower2, eyeHeight));
     }
 
