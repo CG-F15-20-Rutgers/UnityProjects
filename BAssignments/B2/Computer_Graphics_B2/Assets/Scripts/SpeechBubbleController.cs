@@ -3,7 +3,7 @@ using System.Collections;
 
 public class SpeechBubbleController : MonoBehaviour {
 
-    public float timeToDisplaySpeechBubble;
+	public float defaultTimeToDisplaySpeechBubble;
     private Texture speechBubble;
     private float currTime;
     private bool isBubbleVisible;
@@ -13,7 +13,7 @@ public class SpeechBubbleController : MonoBehaviour {
 	void Start () {
         currTime = 0;
         isBubbleVisible = false;
-        timeToDisplaySpeechBubble = 3;
+		defaultTimeToDisplaySpeechBubble = 3;
         speechBubble = (Texture)Resources.Load("speech_bubble");
 	}
 	
@@ -46,14 +46,20 @@ public class SpeechBubbleController : MonoBehaviour {
         }
     }
 
-    public void DisplaySpeechBubble(string message)
-    {
-        this.message = message;
-        currTime = timeToDisplaySpeechBubble;
-        isBubbleVisible = true;
-
-        Debug.Log(message);
+    public void DisplaySpeechBubble(string message, long duration) {
+		DisplaySpeechBubble(message, duration / 1000f);
     }
+
+	public void DisplaySpeechBubble(string message) {
+		DisplaySpeechBubble(message, defaultTimeToDisplaySpeechBubble);
+	}
+
+	public void DisplaySpeechBubble(string message, float durationInSeconds) {
+		Debug.Log("Message: " + message + " " + durationInSeconds);
+		this.message = message;
+		currTime = durationInSeconds;
+		isBubbleVisible = true;
+	}
 
     public bool IsBubbleVisible()
     {

@@ -222,9 +222,10 @@ public class BehaviorMecanim : MonoBehaviour
             () => this.Character.BodyAnimation(gestureName, false));
     }
 
-    public Node Node_SpeechBubble(Val<string> message)
+    public Node Node_SpeechBubble(Val<string> message, Val<long> duration)
     {
-        return new LeafInvoke(() => this.Character.DisplaySpeechBubble(message.Value));
+		return new Sequence(new LeafInvoke(() => this.Character.DisplaySpeechBubble(message.Value, duration.Value)),
+		                    new LeafWait(duration));
     }
 
     #endregion
@@ -318,7 +319,7 @@ public class BehaviorMecanim : MonoBehaviour
     public Node ST_DisplaySpeechBubble(
         Val<string> message, Val<string> handGesture, Val<long> duration)
     {
-        return new Race(ST_PlayHandGesture(handGesture, duration), Node_SpeechBubble(message));
+        return new SequenceParallel(ST_PlayHandGesture(handGesture, duration), Node_SpeechBubble(message, duration));
     }
 
     #endregion

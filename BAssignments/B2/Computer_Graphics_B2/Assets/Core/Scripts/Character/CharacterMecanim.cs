@@ -274,9 +274,9 @@ public class CharacterMecanim : MonoBehaviour
 		return RunStatus.Success;
 	}
 
-    public virtual RunStatus DisplaySpeechBubble(string message)
+    public virtual RunStatus DisplaySpeechBubble(string message, long duration)
     {
-        GetComponent<SpeechBubbleController>().DisplaySpeechBubble(message);
+        GetComponent<SpeechBubbleController>().DisplaySpeechBubble(message, duration);
         return RunStatus.Success;
     }
 
