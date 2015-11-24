@@ -12,6 +12,8 @@ public class BehaviorTree : MonoBehaviour {
     public GameObject egg;
     public long gestureDuration;
 
+    public GameObject guard_l1;
+
     private BehaviorAgent behaviorAgent;
 
     // Use this for initialization
