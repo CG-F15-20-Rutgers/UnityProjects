@@ -4,6 +4,7 @@ using System.Collections;
 public class TestController : MonoBehaviour {
 
     public GameObject pinPad;
+    public GameObject egg;
 
 	// Use this for initialization
 	void Start () {
@@ -16,6 +17,18 @@ public class TestController : MonoBehaviour {
         {
             IKController ikc = GetComponent<IKController>();
             ikc.PressButton(pinPad.transform);
+        }
+
+        if(Input.GetKeyDown(KeyCode.C))
+        {
+            IKController ikc = GetComponent<IKController>();
+            ikc.StartPrayer(egg.transform);
+        }
+
+        if (Input.GetKeyDown(KeyCode.D))
+        {
+            IKController ikc = GetComponent<IKController>();
+            ikc.EndPrayer();
         }
 	
 	}

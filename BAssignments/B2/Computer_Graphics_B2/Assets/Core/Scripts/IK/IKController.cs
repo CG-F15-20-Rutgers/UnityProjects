@@ -98,6 +98,103 @@ public class IKController : MonoBehaviour
         RETURNING
     }
 
+    enum PrayingIKState
+    {
+        INACTIVE,
+        STARTING,
+        PRAYING,
+        RETRACTING
+    }
+
+    /// <summary>
+    /// Controls IK for praying
+    /// </summary>
+    private class PrayingIKController
+    {
+        CrossfadeFBBIK ikPrimary;
+        CrossfadeFBBIK ikSecondary;
+        PrayingIKState state;
+
+        float currAnimTime;
+        float maxTime;
+
+        public PrayingIKController(CrossfadeFBBIK[] iks)
+        {
+            ikPrimary = iks[0];
+            ikSecondary = iks[1];
+            state = PrayingIKState.INACTIVE;
+            maxTime = 0.4f;
+        }
+
+        public void StartPrayer(Transform egg)
+        {
+            if (state == PrayingIKState.INACTIVE)
+            {
+                state = PrayingIKState.STARTING;
+                Vector3 target = egg.position - new Vector3(0, 0, 1.5f);
+                ikSecondary.solver.leftHandEffector.position = target - new Vector3(0.2f, 0, 0);
+                ikSecondary.solver.rightHandEffector.position = target + new Vector3(0.2f, 0, 0);
+            }
+        }
+
+        public void EndPrayer()
+        {
+            if (state != PrayingIKState.INACTIVE)
+            {
+                state = PrayingIKState.RETRACTING;
+            }
+        }
+
+        public void Update()
+        {
+            switch (state)
+            {
+                case PrayingIKState.INACTIVE:
+                    break;
+                case PrayingIKState.STARTING:
+                    currAnimTime += Time.deltaTime;
+                    float weight;
+                    if (currAnimTime > maxTime)
+                    {
+                        currAnimTime = maxTime;
+                        weight = 1;
+                        state = PrayingIKState.PRAYING;
+                    }
+                    else
+                    {
+                        float normTime = currAnimTime / maxTime;
+                        weight = Mathf.Sin(normTime * Mathf.PI / 2);
+                    }
+                    ikSecondary.solver.leftHandEffector.positionWeight = weight;
+                    ikSecondary.solver.rightHandEffector.positionWeight = weight;
+                    break;
+                case PrayingIKState.PRAYING:
+                    break;
+                case PrayingIKState.RETRACTING:
+                    currAnimTime -= Time.deltaTime;
+                    if (currAnimTime < 0)
+                    {
+                        currAnimTime = 0;
+                        weight = 0;
+                        state = PrayingIKState.INACTIVE;
+                    }
+                    else
+                    {
+                        float normTime = currAnimTime / maxTime;
+                        weight = Mathf.Sin(normTime * Mathf.PI / 2);
+                    }
+                    ikSecondary.solver.leftHandEffector.positionWeight = weight;
+                    ikSecondary.solver.rightHandEffector.positionWeight = weight;
+                    break;
+            }
+        }
+
+        public bool IsActive()
+        {
+            return state == PrayingIKState.INACTIVE;
+        }
+    }
+
     /// <summary>
     /// Controls IK for pressing a button
     /// </summary>
@@ -105,22 +202,18 @@ public class IKController : MonoBehaviour
     {
         CrossfadeFBBIK ikPrimary;
         CrossfadeFBBIK ikSecondary;
-        Interpolator<float> interp;
         ButtonPressState state;
-        float delay;
 
         Transform currentPinPad;
 
         float currAnimTime;
         float maxTime;
 
-        public ButtonIKController(CrossfadeFBBIK[] iks, float delay)
+        public ButtonIKController(CrossfadeFBBIK[] iks)
         {
             this.ikPrimary = iks[0];
             this.ikSecondary = iks[1];
-            this.interp = new Interpolator<float>(0f, 1f, Mathf.Lerp);
             this.state = ButtonPressState.INACTIVE;
-            this.delay = delay;
             this.currAnimTime = 0.0f;
             this.maxTime = 0.6f;
         }
@@ -524,6 +617,7 @@ public class IKController : MonoBehaviour
     private LookAtIKController lookController;
     private BodyIKController bodyController;
     private ButtonIKController buttonController;
+    private PrayingIKController prayerController;
 
     void Awake()
     {
@@ -535,8 +629,9 @@ public class IKController : MonoBehaviour
             this.GetComponents<CrossfadeFBBIK>(),
             this.DefaultDelay);
         this.buttonController = new ButtonIKController(
-            this.GetComponents<CrossfadeFBBIK>(),
-            this.DefaultDelay);
+            this.GetComponents<CrossfadeFBBIK>());
+        this.prayerController = new PrayingIKController(
+            this.GetComponents<CrossfadeFBBIK>());
         this.RegisterWithBodyController();
     }
 
@@ -545,6 +640,7 @@ public class IKController : MonoBehaviour
         this.bodyController.Update();
         this.lookController.Update();
         this.buttonController.Update();
+        this.prayerController.Update();
 
         if (this.bodyController.State == BodyIKState.Offline
             && this.lookController.IsFullBody() == false)
@@ -555,6 +651,16 @@ public class IKController : MonoBehaviour
     {
         this.bodyController.LateUpdate();
         this.lookController.LateUpdate();
+    }
+
+    public void StartPrayer(Transform egg)
+    {
+        this.prayerController.StartPrayer(egg);
+    }
+
+    public void EndPrayer()
+    {
+        this.prayerController.EndPrayer();
     }
 
     public void PressButton(Transform pinPad)
