@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using System;
 using System.Collections;
 using TreeSharpPlus;
 
@@ -84,7 +85,7 @@ public class BehaviorTree : MonoBehaviour {
     protected Node AttackGuard(GameObject thief, GameObject guard, Val<float> distance)
     {
         Val<Vector3> target = Val.V(() => guard.transform.position);
-        int iter = Random.Range(3, 5);
+        int iter = UnityEngine.Random.Range(3, 5);
 
         /*
             TODO: Figure out what string represents the animation:
@@ -105,7 +106,7 @@ public class BehaviorTree : MonoBehaviour {
         //TODO: Implement PushButton
         return new Sequence(mec(thief).Node_GoToUpToRadius(target, distance),
                             mec(thief).Node_HeadLook(target),
-                            mec(thief).PushButtonObject(button));*/
+                            mec(thief).st_PlayBodyGesture(button));*/
     }
 
     protected Node ApproachAndOrientTarget(GameObject a, Val<Vector3> target, Val<float> distance) {
@@ -131,6 +132,25 @@ public class BehaviorTree : MonoBehaviour {
 
     protected Node PrayArc(GameObject[] guys) {
         return new ForEach<GameObject>(PrayArcFactory, guys);
+    }
+
+    protected GameObject[] getGuards()
+    {
+        GameObject[] guardList = GameObject.FindGameObjectsWithTag("Guard");
+        Array.Sort(guardList, new GuardCompare());
+        return null;
+    }
+
+    private class GuardCompare : IComparer
+    {
+        int IComparer.Compare(object a, object b)
+        {
+            GameObject guardA = (GameObject)a;
+            GameObject guardB = (GameObject)b;
+            if (guardA.transform.parent.position.z > guardB.transform.parent.position.z) return 1;
+            else if (guardA.transform.parent.position.z < guardB.transform.parent.position.z) return -1;
+            else return 0;
+        }
     }
 
 

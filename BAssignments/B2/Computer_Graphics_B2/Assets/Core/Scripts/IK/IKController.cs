@@ -91,13 +91,6 @@ public class IKController : MonoBehaviour
         }
     }
 
-    enum ButtonPressState
-    {
-        INACTIVE,
-        PRESSING,
-        RETURNING
-    }
-
     enum PrayingIKState
     {
         INACTIVE,
@@ -320,6 +313,13 @@ public class IKController : MonoBehaviour
             return tg;
         }
 
+    }
+
+    enum ButtonPressState
+    {
+        INACTIVE,
+        PRESSING,
+        RETURNING
     }
 
     /// <summary>
