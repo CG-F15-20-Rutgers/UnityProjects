@@ -30,12 +30,18 @@ public class DoorController : MonoBehaviour {
         door_state = State.STATE_CLOSED;
 	}
 
-    void OpenDoor()
+    public void ToggleDoor()
+    {
+        if (door_state == State.STATE_OPEN) door_state = State.STATE_CLOSING;
+        else if (door_state == State.STATE_CLOSED) door_state = State.STATE_OPENING;
+    }
+
+    public void OpenDoor()
     {
         door_state = State.STATE_OPENING;
     }
 
-    void CloseDoor()
+    public void CloseDoor()
     {
         door_state = State.STATE_CLOSING;
     }
@@ -86,16 +92,10 @@ public class DoorController : MonoBehaviour {
                 right_door.transform.position = pos;
                 break;
             case State.STATE_CLOSED:
-                if (Input.GetKeyDown(KeyCode.A))
-                {
-                    OpenDoor();
-                }
+                // Do stuff here
                 break;
             case State.STATE_OPEN:
-                if (Input.GetKeyDown(KeyCode.A))
-                {
-                    CloseDoor();
-                }
+                // Do stuff here
                 break;
         }
 	}

@@ -91,6 +91,102 @@ public class IKController : MonoBehaviour
         }
     }
 
+    enum ButtonPressState
+    {
+        INACTIVE,
+        PRESSING,
+        RETURNING
+    }
+
+    /// <summary>
+    /// Controls IK for pressing a button
+    /// </summary>
+    private class ButtonIKController
+    {
+        CrossfadeFBBIK ikPrimary;
+        CrossfadeFBBIK ikSecondary;
+        Interpolator<float> interp;
+        ButtonPressState state;
+        float delay;
+
+        Transform currentPinPad;
+
+        float currAnimTime;
+        float maxTime;
+
+        public ButtonIKController(CrossfadeFBBIK[] iks, float delay)
+        {
+            this.ikPrimary = iks[0];
+            this.ikSecondary = iks[1];
+            this.interp = new Interpolator<float>(0f, 1f, Mathf.Lerp);
+            this.state = ButtonPressState.INACTIVE;
+            this.delay = delay;
+            this.currAnimTime = 0.0f;
+            this.maxTime = 0.6f;
+        }
+
+        public void PressButton(Transform pinPad)
+        {
+            if (!IsActive())
+            {
+                currentPinPad = pinPad;
+                ikSecondary.solver.leftHandEffector.position = pinPad.position;
+                state = ButtonPressState.PRESSING;
+            }
+        }
+
+        public void Update()
+        {
+            switch (state)
+            {
+                case ButtonPressState.PRESSING:
+                    currAnimTime += Time.deltaTime;
+                    float weight;
+                    if (currAnimTime > maxTime)
+                    {
+                        currAnimTime = maxTime;
+                        weight = 1;
+                        state = ButtonPressState.RETURNING;
+                        DoorController dc = currentPinPad.parent.gameObject.GetComponent<DoorController>();
+                        if (dc != null)
+                        {
+                            dc.ToggleDoor();
+                        }
+                    }
+                    else
+                    {
+                        float normTime = currAnimTime / maxTime;
+                        weight = Mathf.Sin(normTime * Mathf.PI / 2);
+                    }
+                    ikSecondary.solver.leftHandEffector.positionWeight = weight;
+                    break;
+                case ButtonPressState.RETURNING:
+                    currAnimTime -= Time.deltaTime;
+                    if (currAnimTime < 0)
+                    {
+                        currAnimTime = 0;
+                        weight = 0;
+                        state = ButtonPressState.INACTIVE;
+                    }
+                    else
+                    {
+                        float normTime = currAnimTime / maxTime;
+                        weight = Mathf.Sin(normTime * Mathf.PI / 2);
+                    }
+                    ikSecondary.solver.leftHandEffector.positionWeight = weight;
+                    break;
+                case ButtonPressState.INACTIVE:
+                default:
+                    break;
+            }
+        }
+
+        public bool IsActive()
+        {
+            return state != ButtonPressState.INACTIVE;
+        }
+    }
+    
     private enum BodyIKState
     {
         Online,
@@ -427,6 +523,7 @@ public class IKController : MonoBehaviour
 
     private LookAtIKController lookController;
     private BodyIKController bodyController;
+    private ButtonIKController buttonController;
 
     void Awake()
     {
@@ -437,6 +534,9 @@ public class IKController : MonoBehaviour
         this.bodyController = new BodyIKController(
             this.GetComponents<CrossfadeFBBIK>(),
             this.DefaultDelay);
+        this.buttonController = new ButtonIKController(
+            this.GetComponents<CrossfadeFBBIK>(),
+            this.DefaultDelay);
         this.RegisterWithBodyController();
     }
 
@@ -444,6 +544,7 @@ public class IKController : MonoBehaviour
     {
         this.bodyController.Update();
         this.lookController.Update();
+        this.buttonController.Update();
 
         if (this.bodyController.State == BodyIKState.Offline
             && this.lookController.IsFullBody() == false)
@@ -454,6 +555,11 @@ public class IKController : MonoBehaviour
     {
         this.bodyController.LateUpdate();
         this.lookController.LateUpdate();
+    }
+
+    public void PressButton(Transform pinPad)
+    {
+        this.buttonController.PressButton(pinPad);
     }
 
     public void LookAt(Vector3 target, float delay)
