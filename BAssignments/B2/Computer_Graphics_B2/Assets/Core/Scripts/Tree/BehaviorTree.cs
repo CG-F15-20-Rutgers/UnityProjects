@@ -51,7 +51,12 @@ public class BehaviorTree : MonoBehaviour {
     protected Node IntroTree() {
         Val<Vector3> target = Val.V(() => (follower1.transform.position + follower2.transform.position) / 2);
         float distance = 1.5f;
-        return new Sequence(ApproachAndOrient(follower1, follower2, target, distance), MaintainEyeContactWhileConversing(follower1, follower2, eyeHeight));
+        return new Sequence(
+            ApproachAndOrient(follower1, follower2, target, distance), 
+            MaintainEyeContactWhileConversing(follower1, follower2, eyeHeight),
+            new SequenceParallel(
+                AngryGesture(follower1, guard_l1),
+                AngryGesture(follower2, guard_l1)));
     }
 
     protected Node MaintainEyeContact(GameObject a, GameObject b, Vector3 eyeHeight) {
@@ -65,15 +70,14 @@ public class BehaviorTree : MonoBehaviour {
 		                    Speak(b, "Hi!", "WAVE"),
 
 		                    Speak(a, "Do you know what they are guarding?", "THINK"),
+                            PointAt(a, guard_l1, true),
+                            new LeafWait(Val.V<long>((long)3500.0)),
+
 		                    Speak(b, "No! do you want to find out?", "HANDSUP"),
 
 		                    Speak(a, "Yes, but we will need to kill the guards", "CUTTHROAT"),
 
-		                    Speak(b, "Okay, lets do it!", "CHEER"),
-
-		                    new LeafWait(Val.V<long>((long)3500.0)),
-		                    Gesture(a, "SHOCK"), 
-		                    Gesture(b, "CHEER"));
+		                    Speak(b, "Okay, lets do it!", "CHEER"),);
     }
 
     protected Node MaintainEyeContactWhileConversing(GameObject a, GameObject b, Vector3 eyeHeight) {
