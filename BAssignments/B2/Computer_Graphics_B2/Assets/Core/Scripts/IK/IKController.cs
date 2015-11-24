@@ -675,6 +675,11 @@ public class IKController : MonoBehaviour
         this.buttonController.PressButton(pinPad);
     }
 
+    public bool IsPressingButton()
+    {
+        return this.buttonController.IsActive();
+    }
+
     public void LookAt(Vector3 target, float delay)
     {
         this.lookController.LookAt(target, delay);
