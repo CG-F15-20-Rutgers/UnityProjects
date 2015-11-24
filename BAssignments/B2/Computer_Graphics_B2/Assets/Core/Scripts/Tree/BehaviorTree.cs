@@ -55,12 +55,18 @@ public class BehaviorTree : MonoBehaviour {
     }
 
     protected Node Converse(GameObject a, GameObject b) {
-		return new Sequence(Speak(b, "Hello!", "WAVE"),
-		                    new LeafWait(Val.V<long>((long)3500.0)),
-							Speak(a, "Let's attack the guards!", "CRY"), 
+		return new Sequence(Speak(a, "Hello!", "WAVE"),
+		                    Speak(b, "Hi!", "WAVE"),
+
+		                    Speak(a, "Do you know what they are guarding?", "THINK"),
+		                    Speak(b, "No! do you want to find out?", "HANDSUP"),
+
+		                    Speak(a, "Yes, but we will need to kill the guards", "CUTTHROAT"),
+
+		                    Speak(b, "Okay, lets do it!", "CHEER"),
+
 		                    new LeafWait(Val.V<long>((long)3500.0)),
 		                    Gesture(a, "SHOCK"), 
-		                    new LeafWait(Val.V<long>((long)3500.0)),
 		                    Gesture(b, "CHEER"));
     }
 
