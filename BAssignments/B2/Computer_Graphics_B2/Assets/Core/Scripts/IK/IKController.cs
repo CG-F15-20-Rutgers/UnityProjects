@@ -198,7 +198,7 @@ public class IKController : MonoBehaviour
 
         public bool IsActive()
         {
-            return state == PrayingIKState.INACTIVE;
+            return state != PrayingIKState.INACTIVE;
         }
     }
 
@@ -668,6 +668,11 @@ public class IKController : MonoBehaviour
     public void EndPrayer(Transform egg)
     {
         this.prayerController.EndPrayer(egg);
+    }
+
+    public bool IsPraying()
+    {
+        return this.prayerController.IsActive();
     }
 
     public void PressButton(Transform pinPad)

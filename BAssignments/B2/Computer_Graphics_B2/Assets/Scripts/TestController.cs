@@ -72,7 +72,7 @@ public class TestController : MonoBehaviour {
         }
         else if (status == 8)
         {
-            if (!ikc.IsPressingButton())
+            if (!ikc.IsPressingButton() && !ikc.IsPraying())
             {
                 nma.SetDestination(egg.transform.position - new Vector3(0, 0, 2));
                 status++;
@@ -83,30 +83,13 @@ public class TestController : MonoBehaviour {
             if (nma.pathStatus == NavMeshPathStatus.PathComplete && nma.remainingDistance == 0)
             {
                 ikc.StartPrayer(gameObject.transform, egg.transform);
+                status++;
             }
             else
             {
                 nma.SetDestination(egg.transform.position - new Vector3(0, 0, 2));
             }
         }
-
-        /*if (Input.GetKeyDown(KeyCode.B))
-        {
-            IKController ikc = GetComponent<IKController>();
-            ikc.PressButton(pinPad.transform);
-        }
-
-        if(Input.GetKeyDown(KeyCode.C))
-        {
-            IKController ikc = GetComponent<IKController>();
-            ikc.StartPrayer(gameObject.transform, egg.transform);
-        }
-
-        if (Input.GetKeyDown(KeyCode.D))
-        {
-            IKController ikc = GetComponent<IKController>();
-            ikc.EndPrayer(egg.transform);
-        }*/
 	
 	}
 }
