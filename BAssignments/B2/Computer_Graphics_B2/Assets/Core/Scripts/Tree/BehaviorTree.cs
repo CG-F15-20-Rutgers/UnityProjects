@@ -100,29 +100,54 @@ public class BehaviorTree : MonoBehaviour {
 
     protected Node MiddleArc() {
         Wave[] waves = getWaves();
-        return new Sequence(new ForEach<GameObject>(OpenDoorArc, waves));
+        return new Sequence(new ForEach<Wave>(OpenDoorArc, waves));
     }
 
     protected Node OpenDoorArc(Wave wave) {
         System.Action func = delegate
         {
-            GameObject[] guards = GetChildrenForWave(wave, true);
+            GameObject[] guards = getChildrenForWave(wave, true);
             for(int i = 0; i < guards.Length; i++)
             {
                 gzMappings.Add(guards[i], zealots[i]);
             }
         };
+        System.Action func2 = delegate
+        {
+            GameObject pinPad = (getChildrenForWave(wave, false))[0];
+            NavMeshAgent zealot = zealots[0].GetComponent<NavMeshAgent>();
+            IKController ikc = zealot.GetComponent<IKController>();
+
+            //Part 1
+            zealot.SetDestination(pinPad.transform.position - new Vector3(-1, 0, 1));
+            //Part 2
+            while (true) {
+                if (zealot.pathStatus == NavMeshPathStatus.PathComplete && zealot.remainingDistance == 0)
+                {
+                    ikc.PressButton(pinPad.transform);
+                    while (true)
+                    {
+                        //Part 3
+                        if (!ikc.IsPressingButton())
+                        {
+                            goto end;
+                        }
+                    }
+                }
+            }
+            end: {}
+        };
         //TODO: push buttons component
         return new Sequence(new LeafInvoke(func),
                             new ForEach<GameObject>(AttackArc, gzMappings.Keys),
-                            PushButton(wave));
+                            new LeafInvoke(func2));
     }
 
     protected Node AttackArc(GameObject guard) {
         GameObject zealot;
         gzMappings.TryGetValue(guard, out zealot);
         Val<Vector3> target = Val.V(() => guard.transform.position);
-        int iter = Random.Range(3, 5);
+        int iter = UnityEngine.Random.Range(3, 5);
         float distance = 5.0f;
 
         // TODO: Implement FancyDeathAnimation
@@ -133,8 +158,8 @@ public class BehaviorTree : MonoBehaviour {
                             mec(guard).FancyDeathAnimation());
     }
 
-    protected Node PushButton(Wave wave) {
-        GameObject pinPad = (GetChildrenForWave(waveSize, false))[0];
+    protected RunStatus PushButton(Wave wave) {
+        GameObject pinPad = (getChildrenForWave(wave, false))[0];
         NavMeshAgent zealot = zealots[0].GetComponent<NavMeshAgent>();
         IKController ikc = zealot.GetComponent<IKController>();
 
@@ -156,6 +181,7 @@ public class BehaviorTree : MonoBehaviour {
             }
         }
         end: {}
+        return RunStatus.Success;
     }
 
     protected Node ApproachAndOrientTarget(GameObject a, Val<Vector3> target, Val<float> distance) {
@@ -183,7 +209,7 @@ public class BehaviorTree : MonoBehaviour {
         return new ForEach<GameObject>(PrayArcFactory, guys);
     }
 
-    private Wave[] getWaves()
+    protected Wave[] getWaves()
     {
         GameObject[] guardPosts = GameObject.FindGameObjectsWithTag("GuardPost");
         Array.Sort(guardPosts, new WaveCompare());
@@ -199,7 +225,7 @@ public class BehaviorTree : MonoBehaviour {
         return waveList;
     }
 
-    private class WaveCompare : IComparer
+    protected class WaveCompare : IComparer
     {
         int IComparer.Compare(object a, object b)
         {
@@ -211,7 +237,7 @@ public class BehaviorTree : MonoBehaviour {
         }
     }
 
-    private GameObject[] getChildrenForWave(Wave wave, bool isGuards)
+    protected GameObject[] getChildrenForWave(Wave wave, bool isGuards)
     {
         GameObject waveGameObject;
         string tag;
@@ -236,7 +262,7 @@ public class BehaviorTree : MonoBehaviour {
         return (GameObject[])list.ToArray();
     }
 
-    private class Wave
+    protected class Wave
     {
         public GameObject guardPost;
         public GameObject doors;
