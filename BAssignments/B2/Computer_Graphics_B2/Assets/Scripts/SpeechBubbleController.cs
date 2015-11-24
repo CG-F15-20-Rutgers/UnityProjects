@@ -4,7 +4,7 @@ using System.Collections;
 public class SpeechBubbleController : MonoBehaviour {
 
     public float timeToDisplaySpeechBubble;
-    public Texture speechBubble;
+    private Texture speechBubble;
     private float currTime;
     private bool isBubbleVisible;
     private string message;
@@ -13,7 +13,8 @@ public class SpeechBubbleController : MonoBehaviour {
 	void Start () {
         currTime = 0;
         isBubbleVisible = false;
-        message = "Hey there!";
+        timeToDisplaySpeechBubble = 3;
+        speechBubble = (Texture)Resources.Load("speech_bubble");
 	}
 	
 	// Update is called once per frame

@@ -202,6 +202,126 @@ public class IKController : MonoBehaviour
         }
     }
 
+    enum PointingState {
+        INACTIVE,
+        RAISING_ARM,
+        HOLDING,
+        LOWERING_ARM
+    }
+
+    private class PointIKController
+    {
+        CrossfadeFBBIK ikPrimary;
+        CrossfadeFBBIK ikSecondary;
+        PointingState state;
+
+        IKEffector effector;
+        Transform target;
+
+        float currAnimTime;
+        float maxTime;
+
+        float holdTime;
+        float maxHoldTime;
+
+        public PointIKController(CrossfadeFBBIK[] iks)
+        {
+            this.ikPrimary = iks[0];
+            this.ikSecondary = iks[1];
+            this.state = PointingState.INACTIVE;
+            this.currAnimTime = 0.0f;
+            this.maxTime = 0.6f;
+            this.holdTime = 0.0f;
+            this.maxHoldTime = 1.0f;
+        }
+
+        public void Point(Transform player, Transform target, bool useRightHand)
+        {
+            if(!isActive()) {
+                this.target = target;
+                if (useRightHand) this.effector = ikSecondary.solver.rightHandEffector;
+                else this.effector = ikSecondary.solver.leftHandEffector;
+                this.effector.position = calculateHandPosition(player, target, useRightHand);
+                state = PointingState.RAISING_ARM;
+                ikSecondary.solver.spineStiffness = 10f;
+            }
+        }
+
+        public void Update()
+        {
+            float normTime;
+            float weight;
+            switch (state)
+            {
+                case PointingState.INACTIVE:
+                    break;
+                case PointingState.RAISING_ARM:
+                    currAnimTime += Time.deltaTime;
+                    if (currAnimTime > maxTime)
+                    {
+                        currAnimTime = maxTime;
+                        weight = 1;
+                        state = PointingState.HOLDING;
+                    }
+                    else
+                    {
+                        normTime = currAnimTime / maxTime;
+                        weight = Mathf.Sin(normTime * Mathf.PI / 2);
+                    }
+                    this.effector.positionWeight = weight;
+                    break;
+                case PointingState.HOLDING:
+                    holdTime += Time.deltaTime;
+                    if (holdTime > maxHoldTime)
+                    {
+                        holdTime = 0;
+                        state = PointingState.LOWERING_ARM;
+                    }
+                    break;
+                case PointingState.LOWERING_ARM:
+                    currAnimTime -= Time.deltaTime;
+                    if (currAnimTime < 0)
+                    {
+                        currAnimTime = 0;
+                        weight = 0;
+                        state = PointingState.INACTIVE;
+                    }
+                    else
+                    {
+                        normTime = currAnimTime / maxTime;
+                        weight = Mathf.Sin(normTime * Mathf.PI / 2);
+                    }
+                    this.effector.positionWeight = weight;
+                    break;
+            }
+        }
+
+        public bool isActive()
+        {
+            return state != PointingState.INACTIVE;
+        }
+
+        public Vector3 calculateHandPosition(Transform player, Transform target, bool useRightHand)
+        {
+            Vector3 tg = target.position - player.position;
+            tg.Normalize();
+            tg = 0.3f * tg + player.position;
+            tg.y = 2f;
+            if (useRightHand && target.position.x > player.position.x)
+            {
+                Quaternion rotation = Quaternion.LookRotation(player.forward);
+                tg = tg + rotation * new Vector3(0.4f, 0, 0);
+            }
+            else if (!useRightHand && target.position.x < player.position.x)
+            {
+                Quaternion rotation = Quaternion.LookRotation(player.forward);
+                tg = tg + rotation * new Vector3(-0.4f, 0, 0);
+            }
+            return tg;
+        }
+
+    }
+
     /// <summary>
     /// Controls IK for pressing a button
     /// </summary>
@@ -623,6 +743,7 @@ public class IKController : MonoBehaviour
 
     private LookAtIKController lookController;
     private BodyIKController bodyController;
+    private PointIKController pointController;
     private ButtonIKController buttonController;
     private PrayingIKController prayerController;
 
@@ -635,6 +756,8 @@ public class IKController : MonoBehaviour
         this.bodyController = new BodyIKController(
             this.GetComponents<CrossfadeFBBIK>(),
             this.DefaultDelay);
+        this.pointController = new PointIKController(
+            this.GetComponents<CrossfadeFBBIK>());
         this.buttonController = new ButtonIKController(
             this.GetComponents<CrossfadeFBBIK>());
         this.prayerController = new PrayingIKController(
@@ -646,6 +769,7 @@ public class IKController : MonoBehaviour
     {
         this.bodyController.Update();
         this.lookController.Update();
+        this.pointController.Update();
         this.buttonController.Update();
         this.prayerController.Update();
 
@@ -658,6 +782,16 @@ public class IKController : MonoBehaviour
     {
         this.bodyController.LateUpdate();
         this.lookController.LateUpdate();
+    }
+
+    public void PointAt(Transform player, Transform target, bool useRightHand)
+    {
+        this.pointController.Point(player, target, useRightHand);
+    }
+
+    public bool IsPointing()
+    {
+        return this.pointController.isActive();
     }
 
     public void StartPrayer(Transform player, Transform egg)

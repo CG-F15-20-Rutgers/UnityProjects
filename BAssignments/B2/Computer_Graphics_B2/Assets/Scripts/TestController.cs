@@ -8,6 +8,8 @@ public class TestController : MonoBehaviour {
     public GameObject pinPadC;
     public GameObject egg;
 
+    public GameObject pointTarget;
+
     int status;
 
     NavMeshAgent nma;
@@ -15,7 +17,7 @@ public class TestController : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-        status = -1;
+        status = -2;
         nma = GetComponent<NavMeshAgent>();
         ikc = GetComponent<IKController>();
 	}
@@ -23,10 +25,19 @@ public class TestController : MonoBehaviour {
 	// Update is called once per frame
     void Update()
     {
+        if (status == -2)
+        {
+            ikc.PointAt(transform, pointTarget.transform, false);
+            status++;
+        }
         if (status == -1)
         {
-            GetComponent<SpeechBubbleController>().DisplaySpeechBubble("Hi! I think we should steal the golden egg!");
-            status++;
+            if (!ikc.IsPointing())
+            {
+                nma.SetDestination(transform.position + new Vector3(0, 0, -1));
+                GetComponent<SpeechBubbleController>().DisplaySpeechBubble("Hi! I think we should steal the golden egg!");
+                status++;
+            }
         }
         else if (status == 0)
         {
