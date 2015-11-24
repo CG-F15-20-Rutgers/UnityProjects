@@ -102,16 +102,11 @@ public class BehaviorTree : MonoBehaviour {
     {
         Val<Vector3> target = Val.V(() => guard.transform.position);
         int iter = UnityEngine.Random.Range(3, 5);
-
-        /*
-            TODO: Figure out what string represents the animation:
-            ./Male Fighter Mecanim Animation Pack Free/Animations/Male@Punch.FBX
-            to replace the "???" in the ST_PlayHandGesture calls
-        */
+        
         return new Sequence(mec(thief).Node_GoToUpToRadius(target, distance),
                     new DecoratorLoop(iter,
-                        new Sequence(mec(thief).ST_PlayHandGesture("???", 10),
-                                     mec(guard).ST_PlayHandGesture("???", 10))));
+                        new Sequence(mec(thief).ST_PlayBodyGesture("NEW_PUNCH", 10),
+                                     mec(guard).ST_PlayBodyGesture("NEW_PUNCH", 10))));
     }
 
     protected Node PushButton(GameObject thief, GameObject button, Vector3 buttonHeight, Val<float> distance)
