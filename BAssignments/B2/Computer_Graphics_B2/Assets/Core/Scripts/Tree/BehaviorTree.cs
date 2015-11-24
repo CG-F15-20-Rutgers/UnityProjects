@@ -150,13 +150,20 @@ public class BehaviorTree : MonoBehaviour {
         int iter = UnityEngine.Random.Range(3, 5);
         float distance = 5.0f;
 
+        System.Action func = delegate
+        {
+            IKController ikc = guard.GetComponent<IKController>();
+            ikc.Die(guard.transform);
+        };
+
         // TODO: Implement FancyDeathAnimation
         return new Sequence(mec(zealot).Node_GoToUpToRadius(target, distance),
                             new DecoratorLoop(iter,
                                               new Sequence(mec(zealot).ST_PlayBodyGesture("NEW_PUNCH", 500),
                                               mec(guard).ST_PlayBodyGesture("NEW_PUNCH", 500))),
-                            mec(guard).FancyDeathAnimation());
+                            new LeafInvoke(func));
     }
+
 
     protected RunStatus PushButton(Wave wave) {
         GameObject pinPad = (getChildrenForWave(wave, false))[0];
