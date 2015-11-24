@@ -134,10 +134,19 @@ public class BehaviorTree : MonoBehaviour {
         return new ForEach<GameObject>(PrayArcFactory, guys);
     }
 
-    protected GameObject[] getWaves(string tag)
+    protected Wave[] getWaves()
     {
-        GameObject[] waveList = GameObject.FindGameObjectsWithTag(tag);
-        Array.Sort(waveList, new WaveCompare());
+        GameObject[] guardPosts = GameObject.FindGameObjectsWithTag("GuardPost");
+        Array.Sort(guardPosts, new WaveCompare());
+
+        GameObject[] doors = GameObject.FindGameObjectsWithTag("Door");
+        Array.Sort(doors, new WaveCompare());
+
+        Wave[] waveList = new Wave[Mathf.Min(guardPosts.Length, doors.Length)];
+        for (int i = 0; i < waveList.Length; i++)
+        {
+            waveList[i] = new Wave(guardPosts[i], doors[i]);
+        }
         return waveList;
     }
 
@@ -153,17 +162,41 @@ public class BehaviorTree : MonoBehaviour {
         }
     }
 
-    protected GameObject[] getGuardsForWave(GameObject wave)
+    protected GameObject[] getChildrenForWave(Wave wave, bool isGuards)
     {
-        ArrayList list = new ArrayList();
-        foreach (Transform child in wave.transform)
+        GameObject waveGameObject;
+        string tag;
+        if (isGuards)
         {
-            if (child.CompareTag("Guard"))
+            waveGameObject = wave.guardPost;
+            tag = "Guard";
+        }
+        else
+        {
+            waveGameObject = wave.doors;
+            tag = "PinPad";
+        }
+        ArrayList list = new ArrayList();
+        foreach (Transform child in waveGameObject.transform)
+        {
+            if (child.CompareTag(tag))
             {
                 list.Add(child.gameObject);
             }
         }
         return (GameObject[])list.ToArray();
+    }
+
+    private class Wave
+    {
+        public GameObject guardPost;
+        public GameObject doors;
+
+        public Wave(GameObject guardPost, GameObject doors)
+        {
+            this.guardPost = guardPost;
+            this.doors = doors;
+        }
     }
 
 
