@@ -15,7 +15,7 @@ public class TestController : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-        status = 0;
+        status = -1;
         nma = GetComponent<NavMeshAgent>();
         ikc = GetComponent<IKController>();
 	}
@@ -23,10 +23,18 @@ public class TestController : MonoBehaviour {
 	// Update is called once per frame
     void Update()
     {
-        if (status == 0)
+        if (status == -1)
         {
-            nma.SetDestination(pinPad.transform.position - new Vector3(-1, 0, 1));
+            GetComponent<SpeechBubbleController>().DisplaySpeechBubble("Hi! I think we should steal the golden egg!");
             status++;
+        }
+        else if (status == 0)
+        {
+            if (!GetComponent<SpeechBubbleController>().IsBubbleVisible())
+            {
+                nma.SetDestination(pinPad.transform.position - new Vector3(-1, 0, 1));
+                status++;
+            }
         }
         else if (status == 1)
         {
