@@ -392,6 +392,20 @@ public class BodyMecanim : MonoBehaviour
         case "DUCK":
             this.animator.SetBool("B_Duck", isActive);
             break;
+
+		case "NEW_PUSH_BUTTON":
+			this.animator.SetBool("B_new_PushButton", isActive);
+			break;
+		case "NEW_PUNCH":
+			this.animator.SetBool("B_new_Punch", isActive);
+			break;
+		case "NEW_BATTLE_ROAR":
+			this.animator.SetBool("B_new_BattleRoar", isActive);
+			break;
+		case "NEW_PRAYING":
+			this.animator.SetBool("B_new_Praying", isActive);
+			break;
+
 		}
 	}
 
