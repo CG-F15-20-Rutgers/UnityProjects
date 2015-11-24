@@ -48,18 +48,21 @@ public class BehaviorTree : MonoBehaviour {
     }
 
     protected Node BuildTreeRoot() {
-        return new Sequence(IntroTree());
+        Debug.Log("Build Tree Root");
+        return new Sequence(IntroTree(), MiddleArc());
     }
 
     protected Node IntroTree() {
         Val<Vector3> target = Val.V(() => (follower1.transform.position + follower2.transform.position) / 2);
         float distance = 1.5f;
         return new Sequence(
-            ApproachAndOrient(follower1, follower2, target, distance), 
+            ApproachAndOrient(follower1, follower2, target, distance),
             MaintainEyeContactWhileConversing(follower1, follower2, eyeHeight),
-            new SequenceParallel(
-                AngryGesture(follower1, guard_l1),
-                AngryGesture(follower2, guard_l1)));
+            new LeafInvoke(delegate { Debug.Log("Finished convo"); }));
+          //  new SequenceParallel(
+           //     AngryGesture(follower1, guard_l1),
+           //     AngryGesture(follower2, guard_l1)),
+           //     new LeafInvoke(delegate {Debug.Log("Finished convo");}));
     }
 
     protected Node MaintainEyeContact(GameObject a, GameObject b, Vector3 eyeHeight) {
@@ -69,18 +72,19 @@ public class BehaviorTree : MonoBehaviour {
     }
 
     protected Node Converse(GameObject a, GameObject b) {
-		return new Sequence(Speak(a, "Hello!", "WAVE"),
-		                    Speak(b, "Hi!", "WAVE"),
+        return new Sequence(Speak(a, "Hello!", "WAVE"),
+                            Speak(b, "Hi!", "WAVE"),
 
-		                    Speak(a, "Do you know what they are guarding?", "THINK"),
+                            Speak(a, "Do you know what they are guarding?", "THINK"),
                             PointAt(a, guard_l1, true),
                             new LeafWait(Val.V<long>((long)3500.0)),
 
-		                    Speak(b, "No! do you want to find out?", "HANDSUP"),
+                            Speak(b, "No! do you want to find out?", "HANDSUP"),
 
-		                    Speak(a, "Yes, but we will need to kill the guards", "CUTTHROAT"),
+                            Speak(a, "Yes, but we will need to kill the guards", "CUTTHROAT"),
 
-		                    Speak(b, "Okay, lets do it!", "CHEER"));
+                            Speak(b, "Okay, lets do it!", "CHEER"),
+                            new LeafInvoke(delegate { Debug.Log("Done"); }));
     }
 
     protected Node MaintainEyeContactWhileConversing(GameObject a, GameObject b, Vector3 eyeHeight) {
@@ -91,14 +95,13 @@ public class BehaviorTree : MonoBehaviour {
         Val<Vector3> p1 = Val.V(() => a.transform.position);
         Val<Vector3> p2 = Val.V(() => b.transform.position);
         return new Sequence(new SequenceParallel(mec(a).Node_GoToUpToRadius(target, distance),
-                                                 mec(b).Node_GoToUpToRadius(target, distance)),
-                            new SequenceParallel(mec(a).Node_OrientTowards(p2),
-                                                  mec(b).Node_OrientTowards(p1)));
+                                                 mec(b).Node_GoToUpToRadius(target, distance)));
     }
 
     // pragma mark new code.
 
     protected Node MiddleArc() {
+        Debug.Log("Middle arc being compiled");
         Wave[] waves = getWaves();
         return new Sequence(new ForEach<Wave>(OpenDoorArc, waves));
     }
@@ -106,7 +109,9 @@ public class BehaviorTree : MonoBehaviour {
     protected Node OpenDoorArc(Wave wave) {
         System.Action func = delegate
         {
+            Debug.Log("Creating matchups");
             GameObject[] guards = getChildrenForWave(wave, true);
+            zealots = GameObject.FindGameObjectsWithTag("Player");
             for(int i = 0; i < guards.Length; i++)
             {
                 gzMappings.Add(guards[i], zealots[i]);
@@ -114,6 +119,7 @@ public class BehaviorTree : MonoBehaviour {
         };
         System.Action func2 = delegate
         {
+            Debug.Log("Opening a door");
             GameObject pinPad = (getChildrenForWave(wave, false))[0];
             NavMeshAgent zealot = zealots[0].GetComponent<NavMeshAgent>();
             IKController ikc = zealot.GetComponent<IKController>();
@@ -137,13 +143,13 @@ public class BehaviorTree : MonoBehaviour {
             }
             end: {}
         };
-        //TODO: push buttons component
         return new Sequence(new LeafInvoke(func),
                             new ForEach<GameObject>(AttackArc, gzMappings.Keys),
                             new LeafInvoke(func2));
     }
 
     protected Node AttackArc(GameObject guard) {
+        Debug.Log("Attack arc");
         GameObject zealot;
         gzMappings.TryGetValue(guard, out zealot);
         Val<Vector3> target = Val.V(() => guard.transform.position);
@@ -192,13 +198,24 @@ public class BehaviorTree : MonoBehaviour {
     }
 
     protected Node ApproachAndOrientTarget(GameObject a, Val<Vector3> target, Val<float> distance) {
-        return new Sequence(mec(a).Node_GoToUpToRadius(target, distance), mec(a).Node_OrientTowards(target));
+        Debug.Log(a.name);
+        return new Sequence(new LeafInvoke(delegate { Debug.Log("Approaching"); }), mec(a).Node_GoToUpToRadius(target, distance), new LeafInvoke(delegate { Debug.Log("Done"); }), new LeafInvoke(Orient(a, target.Value)));
     }
 
     protected Node AngryGesture(GameObject guy, GameObject guard) {
         Val<Vector3> target = Val.V(() => guard.transform.position);
         float distance = 1.0f;
         return new Sequence(ApproachAndOrientTarget(guy, target, distance) /*, mec(guy).Play_AngryGesture()*/);
+    }
+
+    protected System.Action Orient(GameObject a, Vector3 b)
+    {
+        return delegate
+        {
+            UnitySteeringController usc = a.GetComponent<UnitySteeringController>();
+            usc.Target = b;
+            usc.Stop();
+        };
     }
 
     // TODO: add an offset to the egg target?
@@ -258,7 +275,7 @@ public class BehaviorTree : MonoBehaviour {
             waveGameObject = wave.doors;
             tag = "PinPad";
         }
-        ArrayList list = new ArrayList();
+        List<GameObject> list = new List<GameObject>();
         foreach (Transform child in waveGameObject.transform)
         {
             if (child.CompareTag(tag))
@@ -266,7 +283,7 @@ public class BehaviorTree : MonoBehaviour {
                 list.Add(child.gameObject);
             }
         }
-        return (GameObject[])list.ToArray();
+        return list.ToArray();
     }
 
     protected class Wave
