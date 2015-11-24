@@ -193,6 +193,100 @@ public class IKController : MonoBehaviour
         }
     }
 
+    enum LifeState
+    {
+        ALIVE,
+        DYING,
+        DYING2,
+        DEAD
+    }
+    private class DeathIKController
+    {
+        CrossfadeFBBIK ikSecondary;
+        LifeState state;
+
+        float currAnimTime;
+        float maxTime;
+
+        Transform player;
+
+        public DeathIKController(CrossfadeFBBIK[] iks) {
+            this.ikSecondary = iks[1];
+            state = LifeState.ALIVE;
+            currAnimTime = 0f;
+            maxTime = 1.2f;
+        }
+
+        public void Die(Transform player)
+        {
+            if (state == LifeState.ALIVE)
+            {
+                Vector3 location = player.transform.position;
+                location.y = 0;
+                Quaternion forward = Quaternion.LookRotation(player.forward);
+                Vector3 leftHandLocation = location + (forward * new Vector3(-0.3f, 0, 3));
+                Vector3 rightHandLocation = location + (forward * new Vector3(0.3f, 0, 3));
+                ikSecondary.solver.leftHandEffector.position = leftHandLocation;
+                ikSecondary.solver.rightHandEffector.position = rightHandLocation;
+                state = LifeState.DYING;
+                this.player = player;
+            }
+        }
+
+        public void Update()
+        {
+            float weight;
+            switch (state)
+            {
+                case LifeState.ALIVE:
+                    break;
+                case LifeState.DYING:
+                    currAnimTime += Time.deltaTime;
+                    if (currAnimTime > maxTime)
+                    {
+                        currAnimTime = maxTime;
+                        weight = 1;
+                        state = LifeState.DYING2;
+                    }
+                    else
+                    {
+                        float normTime = currAnimTime / maxTime;
+                        weight = Mathf.Sin(normTime * Mathf.PI / 2);
+                    }
+                    ikSecondary.solver.leftHandEffector.positionWeight = weight;
+                    ikSecondary.solver.rightHandEffector.positionWeight = weight;
+                    break;
+                case LifeState.DYING2:
+                    currAnimTime -= Time.deltaTime;
+                    if (currAnimTime < 0)
+                    {
+                        currAnimTime = 0;
+                        weight = 0;
+                        state = LifeState.DEAD;
+                        player.gameObject.SetActive(false);
+                    }
+                    break;
+                case LifeState.DEAD:
+                    break;
+            }
+        }
+
+        public bool IsAlive()
+        {
+            return state == LifeState.ALIVE;
+        }
+
+        public bool IsDying()
+        {
+            return state == LifeState.DYING || state == LifeState.DYING2;
+        }
+
+        public bool IsDead()
+        {
+            return state == LifeState.DEAD;
+        }
+    }
+
     enum PointingState {
         INACTIVE,
         RAISING_ARM,
@@ -740,6 +834,7 @@ public class IKController : MonoBehaviour
     private PointIKController pointController;
     private ButtonIKController buttonController;
     private PrayingIKController prayerController;
+    private DeathIKController deathController;
 
     void Awake()
     {
@@ -756,6 +851,8 @@ public class IKController : MonoBehaviour
             this.GetComponents<CrossfadeFBBIK>());
         this.prayerController = new PrayingIKController(
             this.GetComponents<CrossfadeFBBIK>());
+        this.deathController = new DeathIKController(
+            this.GetComponents<CrossfadeFBBIK>());
         this.RegisterWithBodyController();
     }
 
@@ -766,6 +863,7 @@ public class IKController : MonoBehaviour
         this.pointController.Update();
         this.buttonController.Update();
         this.prayerController.Update();
+        this.deathController.Update();
 
         if (this.bodyController.State == BodyIKState.Offline
             && this.lookController.IsFullBody() == false)
@@ -776,6 +874,26 @@ public class IKController : MonoBehaviour
     {
         this.bodyController.LateUpdate();
         this.lookController.LateUpdate();
+    }
+
+    public void Die(Transform player)
+    {
+        this.deathController.Die(player);
+    }
+
+    public bool IsAlive()
+    {
+        return this.deathController.IsAlive();
+    }
+
+    public bool IsDying()
+    {
+        return this.deathController.IsDying();
+    }
+
+    public bool IsDead()
+    {
+        return this.deathController.IsDead();
     }
 
     public void PointAt(Transform player, Transform target, bool useRightHand)

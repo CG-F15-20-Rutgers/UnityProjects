@@ -17,14 +17,23 @@ public class TestController : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-        status = -2;
+        status = -3;
         nma = GetComponent<NavMeshAgent>();
         ikc = GetComponent<IKController>();
 	}
-	
+    float time = 0;
 	// Update is called once per frame
     void Update()
     {
+        if (status == -3)
+        {
+            time += Time.deltaTime;
+            if (time > 4)
+            {
+                ikc.Die(transform);
+                status = -4;
+            }
+        }
         if (status == -2)
         {
             ikc.PointAt(transform, pointTarget.transform, false);
