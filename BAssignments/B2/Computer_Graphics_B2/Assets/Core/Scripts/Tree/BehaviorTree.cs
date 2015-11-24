@@ -38,6 +38,10 @@ public class BehaviorTree : MonoBehaviour {
 		return mec(g).ST_DisplaySpeechBubble (message, gestureName, gestureDuration);
 	}
 
+    protected Node PointAt(GameObject g, GameObject target, bool useRightHand) {
+        return mec(g).Node_PointAt (Val.V<Transform>(target.transform), Val.V<bool>(useRightHand));
+    }
+
     protected Node BuildTreeRoot() {
         return new Sequence(IntroTree());
     }

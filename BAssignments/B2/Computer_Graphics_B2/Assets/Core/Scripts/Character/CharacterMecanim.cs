@@ -280,6 +280,12 @@ public class CharacterMecanim : MonoBehaviour
         return RunStatus.Success;
     }
 
+    public virtual RunStatus PointAt(Transform pointTargetTransform, bool useRightHand)
+    {
+        GetComponent<IKController>().PointAt(transform, pointTargetTransform, false);
+        return RunStatus.Success;
+    }
+
     #endregion
 
     #region Animation Commands
