@@ -228,6 +228,11 @@ public class BehaviorMecanim : MonoBehaviour
 		                    new LeafWait(duration));
     }
 
+    public Node Node_PointAt(Val<Transform> pointTargetTransform, Val<bool> useRightHand)
+    {
+        return new LeafInvoke(() => this.Character.PointAt(pointTargetTransform.Value, useRightHand.Value));
+    }
+
     #endregion
 
     #endregion
