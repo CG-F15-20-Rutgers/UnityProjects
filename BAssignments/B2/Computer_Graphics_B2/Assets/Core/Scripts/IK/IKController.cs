@@ -104,7 +104,6 @@ public class IKController : MonoBehaviour
     /// </summary>
     private class PrayingIKController
     {
-        CrossfadeFBBIK ikPrimary;
         CrossfadeFBBIK ikSecondary;
         PrayingIKState state;
 
@@ -113,7 +112,6 @@ public class IKController : MonoBehaviour
 
         public PrayingIKController(CrossfadeFBBIK[] iks)
         {
-            ikPrimary = iks[0];
             ikSecondary = iks[1];
             state = PrayingIKState.INACTIVE;
             maxTime = 0.4f;
@@ -204,7 +202,6 @@ public class IKController : MonoBehaviour
 
     private class PointIKController
     {
-        CrossfadeFBBIK ikPrimary;
         CrossfadeFBBIK ikSecondary;
         PointingState state;
 
@@ -219,7 +216,6 @@ public class IKController : MonoBehaviour
 
         public PointIKController(CrossfadeFBBIK[] iks)
         {
-            this.ikPrimary = iks[0];
             this.ikSecondary = iks[1];
             this.state = PointingState.INACTIVE;
             this.currAnimTime = 0.0f;
@@ -327,7 +323,6 @@ public class IKController : MonoBehaviour
     /// </summary>
     private class ButtonIKController
     {
-        CrossfadeFBBIK ikPrimary;
         CrossfadeFBBIK ikSecondary;
         ButtonPressState state;
 
@@ -338,7 +333,6 @@ public class IKController : MonoBehaviour
 
         public ButtonIKController(CrossfadeFBBIK[] iks)
         {
-            this.ikPrimary = iks[0];
             this.ikSecondary = iks[1];
             this.state = ButtonPressState.INACTIVE;
             this.currAnimTime = 0.0f;
