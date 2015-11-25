@@ -8,6 +8,8 @@ public class ProbabilisticNode : Node {
     private static Random RANDOM = new Random();
 
     private double probability;
+    private Node child_a;
+    private Node child_b;
     private Node child;
 
     protected Node lastTicked = null;
@@ -16,8 +18,9 @@ public class ProbabilisticNode : Node {
         get { return lastTicked; }
     }
 
-    public ProbabilisticNode(Node child, double probability) {
-        this.child = child;
+    public ProbabilisticNode(Node child_a, Node child_b, double probability) {
+        this.child_a = child_a;
+        this.child_b = child_b;
         this.probability = probability;
     }
 
@@ -47,20 +50,20 @@ public class ProbabilisticNode : Node {
 
     public override IEnumerable<RunStatus> Execute() {
         if (RANDOM.NextDouble() <= probability) {
-            lastTicked = child;
-
-            child.Start();
-            RunStatus result;
-            while ((result = child.Tick()) == RunStatus.Running) {
-                yield return RunStatus.Running;
-            }
-            child.Stop();
-
-            yield return result;
-            yield break;
+            child = child_a;
+        } else {
+            child = child_b;
         }
-        lastTicked = null;
-        yield return RunStatus.Success;
+        lastTicked = child;
+
+        child.Start();
+        RunStatus result;
+        while ((result = child.Tick()) == RunStatus.Running) {
+            yield return RunStatus.Running;
+        }
+        child.Stop();
+
+        yield return result;
         yield break;
     }
 }
