@@ -44,7 +44,9 @@ public class BehaviorTree : MonoBehaviour {
 	}
 
     protected Node PointAt(GameObject g, GameObject target, bool useRightHand) {
-        return mec(g).Node_PointAt (Val.V<Transform>(target.transform), Val.V<bool>(useRightHand));
+        Val<Transform> transform = Val.V<Transform>(target.transform);
+        Val<Vector3> position = Val.V<Vector3>(target.transform.position);
+        return new Sequence(mec(g).Node_OrientTowards(position), mec(g).Node_PointAt (transform, Val.V<bool>(useRightHand)));
     }
 
     protected Node BuildTreeRoot() {
@@ -58,11 +60,8 @@ public class BehaviorTree : MonoBehaviour {
         return new Sequence(
             ApproachAndOrient(follower1, follower2, target, distance),
             MaintainEyeContactWhileConversing(follower1, follower2, eyeHeight),
-            new LeafInvoke(delegate { Debug.Log("Finished convo"); }));
-          //  new SequenceParallel(
-           //     AngryGesture(follower1, guard_l1),
-           //     AngryGesture(follower2, guard_l1)),
-           //     new LeafInvoke(delegate {Debug.Log("Finished convo");}));
+            new SequenceParallel(
+                AngryGesture(follower2, guard_l1)));
     }
 
     protected Node MaintainEyeContact(GameObject a, GameObject b, Vector3 eyeHeight) {
@@ -75,9 +74,9 @@ public class BehaviorTree : MonoBehaviour {
         return new Sequence(Speak(a, "Hello!", "WAVE"),
                             Speak(b, "Hi!", "WAVE"),
 
-                            Speak(a, "Do you know what they are guarding?", "THINK"),
                             PointAt(a, guard_l1, true),
-                            new LeafWait(Val.V<long>((long)3500.0)),
+                            new LeafWait(Val.V<long>((long)1400.0)),
+                            Speak(a, "Do you know what they are guarding?", "THINK"),
 
                             Speak(b, "No! do you want to find out?", "HANDSUP"),
 
@@ -92,10 +91,20 @@ public class BehaviorTree : MonoBehaviour {
     }
 
     protected Node ApproachAndOrient(GameObject a, GameObject b, Val<Vector3> target, Val<float> distance) {
-        Val<Vector3> p1 = Val.V(() => a.transform.position);
-        Val<Vector3> p2 = Val.V(() => b.transform.position);
-        return new Sequence(new SequenceParallel(mec(a).Node_GoToUpToRadius(target, distance),
-                                                 mec(b).Node_GoToUpToRadius(target, distance)));
+        Quaternion rotA = Quaternion.LookRotation(b.transform.position - a.transform.position);
+        Vector3 targetA = target.Value - (rotA * new Vector3(0, 0, distance.Value));
+        Quaternion rotB = Quaternion.LookRotation(a.transform.position - b.transform.position);
+        Vector3 targetB = target.Value - (rotB * new Vector3(0, 0, distance.Value));
+
+        Val<Vector3> p1 = Val.V(() => targetA);
+        Val<Vector3> p2 = Val.V(() => targetB);
+        return new Sequence(new SequenceParallel(mec(a).Node_OrientTowards(p1),
+                                                 mec(b).Node_OrientTowards(p2)),
+                            new SequenceParallel(mec(a).Node_GoTo(p1),
+                                                 mec(b).Node_GoTo(p2)),
+                                                 new LeafInvoke(delegate{Debug.Log("Done walking");}),
+                            new SequenceParallel(mec(a).Node_OrientTowards(target),
+                                                 mec(b).Node_OrientTowards(target)));
     }
 
     // pragma mark new code.
@@ -106,14 +115,17 @@ public class BehaviorTree : MonoBehaviour {
         return new Sequence(new ForEach<Wave>(OpenDoorArc, waves));
     }
 
-    protected Node OpenDoorArc(Wave wave) {
+    protected Node OpenDoorArc(Wave wave)
+    {
         System.Action func = delegate
         {
             Debug.Log("Creating matchups");
             GameObject[] guards = getChildrenForWave(wave, true);
-            zealots = GameObject.FindGameObjectsWithTag("Player");
+            zealots = GameObject.FindGameObjectsWithTag("Zealot");
+            Debug.Log("Loaded objects");
             for(int i = 0; i < guards.Length; i++)
             {
+                Debug.Log("Added mapping");
                 gzMappings.Add(guards[i], zealots[i]);
             }
         };
@@ -121,9 +133,10 @@ public class BehaviorTree : MonoBehaviour {
         {
             Debug.Log("Opening a door");
             GameObject pinPad = (getChildrenForWave(wave, false))[0];
+            zealots = GameObject.FindGameObjectsWithTag("Zealot");
             NavMeshAgent zealot = zealots[0].GetComponent<NavMeshAgent>();
             IKController ikc = zealot.GetComponent<IKController>();
-
+            
             //Part 1
             zealot.SetDestination(pinPad.transform.position - new Vector3(-1, 0, 1));
             //Part 2
@@ -144,9 +157,9 @@ public class BehaviorTree : MonoBehaviour {
             end: {}
         };
         return new Sequence(new LeafInvoke(func),
-                            new ForEach<GameObject>(AttackArc, gzMappings.Keys),
-                            new LeafInvoke(func2));
-    }
+            new ForEach<GameObject>(AttackArc, gzMappings.Keys));
+            //new LeafInvoke(func2));
+        }
 
     protected Node AttackArc(GameObject guard) {
         Debug.Log("Attack arc");
@@ -163,7 +176,7 @@ public class BehaviorTree : MonoBehaviour {
         };
 
         // TODO: Implement FancyDeathAnimation
-        return new Sequence(mec(zealot).Node_GoToUpToRadius(target, distance),
+        return new Sequence(ApproachAndOrientTarget(zealot, target, distance),
                             new DecoratorLoop(iter,
                                               new Sequence(mec(zealot).ST_PlayBodyGesture("NEW_PUNCH", 500),
                                               mec(guard).ST_PlayBodyGesture("NEW_PUNCH", 500))),
@@ -198,14 +211,16 @@ public class BehaviorTree : MonoBehaviour {
     }
 
     protected Node ApproachAndOrientTarget(GameObject a, Val<Vector3> target, Val<float> distance) {
-        Debug.Log(a.name);
-        return new Sequence(new LeafInvoke(delegate { Debug.Log("Approaching"); }), mec(a).Node_GoToUpToRadius(target, distance), new LeafInvoke(delegate { Debug.Log("Done"); }), new LeafInvoke(Orient(a, target.Value)));
+        Quaternion rotation = Quaternion.LookRotation(target.Value - a.transform.position);
+        Vector3 targetLoc = target.Value - (rotation * new Vector3(0, 0, distance.Value));
+        Val<Vector3> targetAdjusted = Val.V(() => targetLoc);
+        return new Sequence(mec(a).Node_GoTo(targetAdjusted), mec(a).Node_OrientTowards(target));
     }
 
     protected Node AngryGesture(GameObject guy, GameObject guard) {
         Val<Vector3> target = Val.V(() => guard.transform.position);
-        float distance = 1.0f;
-        return new Sequence(ApproachAndOrientTarget(guy, target, distance) /*, mec(guy).Play_AngryGesture()*/);
+        float distance = 2.3f;
+        return new Sequence(ApproachAndOrientTarget(guy, target, distance) );//, mec(guy).Play_AngryGesture());
     }
 
     protected System.Action Orient(GameObject a, Vector3 b)

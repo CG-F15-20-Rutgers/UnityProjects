@@ -107,6 +107,7 @@ public class BehaviorMecanim : MonoBehaviour
                 Vector3 curPos = this.transform.position;
                 if ((targPos - curPos).magnitude < dist.Value)
                 {
+                    Debug.Log("Reached target.");
                     this.Character.NavStop();
                     return RunStatus.Success;
                 }

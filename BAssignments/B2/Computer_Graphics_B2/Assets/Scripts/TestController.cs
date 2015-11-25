@@ -27,12 +27,9 @@ public class TestController : MonoBehaviour {
     {
         if (status == -3)
         {
-            time += Time.deltaTime;
-            if (time > 4)
-            {
-                ikc.Die(transform);
-                status = -4;
-            }
+            GetComponent<UnitySteeringController>().Stop();
+            GetComponent<UnitySteeringController>().Target = new Vector3(0, 0, 0);
+            status = -4;
         }
         if (status == -2)
         {

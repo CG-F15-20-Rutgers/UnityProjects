@@ -101,6 +101,10 @@ public class UnitySteeringController : SteeringController
                 this.navAgent.speed = this.maxSpeed;
             }
         }
+        else
+        {
+            Debug.Log("Disabled");
+        }
     }
 
     public override bool IsAtTarget()
