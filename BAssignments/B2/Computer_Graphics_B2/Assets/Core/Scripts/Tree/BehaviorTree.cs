@@ -231,7 +231,7 @@ public class BehaviorTree : MonoBehaviour {
     protected Node ApproachTarget(GameObject a, Val<Vector3> target, Val<float> distance)
     {
         Quaternion rotation = Quaternion.LookRotation(target.Value - a.transform.position);
-        Vector3 targetLoc = target.Value - (rotation * new Vector3(0, 0, distance.Value));)
+        Vector3 targetLoc = target.Value - (rotation * new Vector3(0, 0, distance.Value));
         Val<Vector3> targetAdjusted = Val.V(() => targetLoc);
         return new Sequence(mec(a).Node_GoTo(targetAdjusted));
     }
