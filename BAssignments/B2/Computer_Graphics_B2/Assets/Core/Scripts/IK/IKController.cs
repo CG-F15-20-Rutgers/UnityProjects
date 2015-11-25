@@ -127,8 +127,8 @@ public class IKController : MonoBehaviour
                 state = PrayingIKState.STARTING;
                 Quaternion rotation = Quaternion.LookRotation(egg.position - character.position);
                 Vector3 target = egg.position - (rotation * new Vector3(0, 0, 1.5f));
-                ikSecondary.solver.leftHandEffector.position = target - new Vector3(0.2f, 0, 0);
-                ikSecondary.solver.rightHandEffector.position = target + new Vector3(0.2f, 0, 0);
+                ikSecondary.solver.leftHandEffector.position = target;
+                ikSecondary.solver.rightHandEffector.position = target;
             }
         }
 

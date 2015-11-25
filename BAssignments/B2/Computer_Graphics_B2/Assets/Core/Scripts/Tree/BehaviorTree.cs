@@ -18,12 +18,14 @@ public class BehaviorTree : MonoBehaviour {
     public GameObject guard_l1;
 
     private BehaviorAgent behaviorAgent;
+    private int numPrayerArcs = 0;
 
     // Use this for initialization
     void Start() {
         behaviorAgent = new BehaviorAgent(BuildTreeRoot());
         BehaviorManager.Instance.Register(behaviorAgent);
         behaviorAgent.StartBehavior();
+        numPrayerArcs = 0;
     }
 
     // Update is called once per frame
@@ -51,7 +53,7 @@ public class BehaviorTree : MonoBehaviour {
 
     protected Node BuildTreeRoot() {
         Debug.Log("Build Tree Root");
-        return new Sequence(IntroTree(), MiddleArc());
+        return new Sequence(IntroTree(), MiddleArc(), PrayArc());
     }
 
     protected Node IntroTree() {
@@ -60,7 +62,7 @@ public class BehaviorTree : MonoBehaviour {
         GameObject[] guards = getChildrenForWave(getWaves()[0], true);
         return new Sequence(
             ApproachAndOrient(follower1, follower2, target, distance),
-            //MaintainEyeContactWhileConversing(follower1, follower2, eyeHeight),
+            MaintainEyeContactWhileConversing(follower1, follower2, eyeHeight),
             new SequenceParallel(
                 AngryGesture(follower2, guards[0]),
                 AngryGesture(follower1, guards[1])));
@@ -130,32 +132,7 @@ public class BehaviorTree : MonoBehaviour {
                 gzMappings.Add(guards[i], zealots[i]);
             }
         };
-        /*System.Action func2 = delegate
-        {
-            Debug.Log("Opening a door");
-            GameObject pinPad = (getChildrenForWave(wave, false))[0];
-            NavMeshAgent zealot = zealots[0].GetComponent<NavMeshAgent>();
-            IKController ikc = zealot.GetComponent<IKController>();
-            
-            //Part 1
-            zealot.SetDestination(pinPad.transform.position - new Vector3(-1, 0, 1));
-            //Part 2
-            while (true) {
-                if (zealot.pathStatus == NavMeshPathStatus.PathComplete && zealot.remainingDistance == 0)
-                {
-                    ikc.PressButton(pinPad.transform);
-                    while (true)
-                    {
-                        //Part 3
-                        if (!ikc.IsPressingButton())
-                        {
-                            goto end;
-                        }
-                    }
-                }
-            }
-            end: {}
-        };*/
+
         GameObject pinPad = getChildrenForWave(wave, false)[0];
         Vector3 pinPadPosition = pinPad.transform.position - new Vector3(-4, 0, 3);
         Debug.Log(pinPad.transform.position);
@@ -180,7 +157,7 @@ public class BehaviorTree : MonoBehaviour {
         //GameObject zealot;
         //gzMappings.TryGetValue(guard, out zealot);
         Val<Vector3> target = Val.V(() => guard.transform.position);
-        int iter = UnityEngine.Random.Range(1, 10);
+        int iter = UnityEngine.Random.Range(1, 1);
         float distance = 5.0f;
 
         System.Action func = delegate
@@ -239,16 +216,21 @@ public class BehaviorTree : MonoBehaviour {
 
     // TODO: add an offset to the egg target?
     protected Node PrayArcFactory(GameObject guy) {
-        float distance = 5.0f;
+        float distance = 0.0f;
+        float checkDistance = 5.0f;
         System.Func<bool> playerIsNearEgg = delegate() {
-            return (guy.transform.position - egg.transform.position).sqrMagnitude <= Mathf.Pow(distance, 2);
+            return (guy.transform.position - egg.transform.position).sqrMagnitude <= Mathf.Pow(checkDistance, 2);
         };
-        Val<Vector3> eggTarget = Val.V(() => egg.transform.position);
-        return new DecoratorLoop(new Sequence(new Selector(new LeafAssert(playerIsNearEgg), ApproachAndOrientTarget(guy, eggTarget, distance)),
+        float angle = (numPrayerArcs++ * 30) + 15;
+        Quaternion rotation = Quaternion.EulerAngles(0, angle, 0);
+        Val<Vector3> eggTarget = Val.V(() => egg.transform.position - new Vector3(0, egg.transform.position.y, 0) + (rotation * new Vector3(0, 0, 2)));
+        return new DecoratorLoop(new Sequence(new Selector(new LeafAssert(playerIsNearEgg), new Sequence(ApproachAndOrientUnderTarget(guy, eggTarget, distance), mec(guy).Node_OrientTowards(egg.transform.position - new Vector3(0, egg.transform.position.y, 0)), new LeafWait(1000))),
                                               PrayToEgg(guy)));
     }
 
-    protected Node PrayArc(GameObject[] guys) {
+    protected Node PrayArc() {
+        egg = GameObject.FindGameObjectWithTag("Egg");
+        GameObject[] guys = GameObject.FindGameObjectsWithTag("Zealot");
         return new ForEach<GameObject>(PrayArcFactory, guys);
     }
 
