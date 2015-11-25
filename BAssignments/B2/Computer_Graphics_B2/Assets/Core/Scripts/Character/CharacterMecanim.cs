@@ -130,6 +130,7 @@ public class CharacterMecanim : MonoBehaviour
         this.Body.NavGoTo(target.Value);
         if (this.Body.NavHasArrived() == true)
         {
+            Debug.Log("Made it!");
             this.Body.NavStop();
             return RunStatus.Success;
         }
