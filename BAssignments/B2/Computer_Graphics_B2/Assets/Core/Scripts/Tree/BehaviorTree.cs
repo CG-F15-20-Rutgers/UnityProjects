@@ -169,8 +169,11 @@ public class BehaviorTree : MonoBehaviour {
         // TODO: Implement FancyDeathAnimation
         return new Sequence(ApproachAndOrientUnderTarget(zealot, Val.V(guard.transform.position), 1f),
                             new DecoratorLoop(iter,
-                                              new SequenceShuffle(mec(zealot).ST_PlayBodyGesture("NEW_PUNCH", 500),
-                                              mec(guard).ST_PlayBodyGesture("NEW_PUNCH", 500))),
+                                              new SequenceShuffle(
+                                                mec(zealot).ST_PlayBodyGesture("FIGHT", 500),
+                                                mec(zealot).ST_PlayBodyGesture("NEW_PUNCH", 500),
+                                                mec(guard).ST_PlayBodyGesture("FIGHT", 500),
+                                                mec(guard).ST_PlayBodyGesture("NEW_PUNCH", 500))),
                             new LeafInvoke(func));
     }
 
