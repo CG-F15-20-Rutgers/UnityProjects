@@ -60,7 +60,7 @@ public class BehaviorTree : MonoBehaviour {
         GameObject[] guards = getChildrenForWave(getWaves()[0], true);
         return new Sequence(
             ApproachAndOrient(follower1, follower2, target, distance),
-            MaintainEyeContactWhileConversing(follower1, follower2, eyeHeight),
+            //MaintainEyeContactWhileConversing(follower1, follower2, eyeHeight),
             new SequenceParallel(
                 AngryGesture(follower2, guards[0]),
                 AngryGesture(follower1, guards[1])));
@@ -157,15 +157,18 @@ public class BehaviorTree : MonoBehaviour {
             end: {}
         };*/
         GameObject pinPad = getChildrenForWave(wave, false)[0];
+        Vector3 pinPadPosition = pinPad.transform.position - new Vector3(-4, 0, 3);
+        Debug.Log(pinPad.transform.position);
         return new Sequence(//new LeafInvoke(func),
             new LeafInvoke(delegate {Debug.Log("Running attaack node");}),
-            new SequenceShuffle(
+            new SequenceParallel(
                    AttackArc(guards[0], zealots[0]),
                    AttackArc(guards[1], zealots[1])
                 ),
-            ApproachAndOrientTarget(zealots[0], Val.V(pinPad.transform.position), 2f),
-            new LeafInvoke(delegate { Debug.Log("ATK"); }),
-            new LeafInvoke(delegate { Debug.Log("Called"); zealots[0].GetComponent<IKController>().PressButton(pinPad.transform); Debug.Log("Invoked"); }),
+                PressButton(zealots[1], pinPad),
+            //ApproachAndOrientUnderTarget(zealots[1], Val.V(pinPadPosition),0f),
+            //new LeafInvoke(delegate { Debug.Log("ATK"); }),
+            new LeafInvoke(delegate { Debug.Log("Called"); zealots[1].GetComponent<IKController>().PressButton(pinPad.transform); Debug.Log("Invoked"); }),
             new LeafWait(1200),
             //new ForEach<GameObject>(AttackArc, gzMappings.Keys),
             new LeafInvoke(delegate {Debug.Log("Finished attack node.");}));
@@ -177,7 +180,7 @@ public class BehaviorTree : MonoBehaviour {
         //GameObject zealot;
         //gzMappings.TryGetValue(guard, out zealot);
         Val<Vector3> target = Val.V(() => guard.transform.position);
-        int iter = UnityEngine.Random.Range(3, 5);
+        int iter = UnityEngine.Random.Range(1, 10);
         float distance = 5.0f;
 
         System.Action func = delegate
@@ -187,38 +190,20 @@ public class BehaviorTree : MonoBehaviour {
         };
 
         // TODO: Implement FancyDeathAnimation
-        return new Sequence(//ApproachAndOrientTarget(zealot, target, distance),
+        return new Sequence(ApproachAndOrientUnderTarget(zealot, Val.V(guard.transform.position), 1f),
                             new DecoratorLoop(iter,
-                                              new Sequence(mec(zealot).ST_PlayBodyGesture("FIGHT", 500),
+                                              new SequenceShuffle(mec(zealot).ST_PlayBodyGesture("NEW_PUNCH", 500),
                                               mec(guard).ST_PlayBodyGesture("NEW_PUNCH", 500))),
                             new LeafInvoke(func));
     }
 
-
-    protected RunStatus PushButton(Wave wave) {
-        GameObject pinPad = (getChildrenForWave(wave, false))[0];
-        NavMeshAgent zealot = zealots[0].GetComponent<NavMeshAgent>();
-        IKController ikc = zealot.GetComponent<IKController>();
-
-        //Part 1
-        zealot.SetDestination(pinPad.transform.position - new Vector3(-1, 0, 1));
-        //Part 2
-        while (true) {
-            if (zealot.pathStatus == NavMeshPathStatus.PathComplete && zealot.remainingDistance == 0)
-            {
-                ikc.PressButton(pinPad.transform);
-                while (true)
-                {
-                    //Part 3
-                    if (!ikc.IsPressingButton())
-                    {
-                        goto end;
-                    }
-                }
-            }
-        }
-        end: {}
-        return RunStatus.Success;
+    protected Node PressButton(GameObject zealot, GameObject pinPad)
+    {
+        Vector3 location = pinPad.transform.position - new Vector3(-1, 0, 0);
+        location.y = 0;
+        Val<Vector3> target = Val.V(() => location);
+        return new Sequence(ApproachAndOrientUnderTarget(zealot, target, 1f),
+                            new LeafInvoke(delegate { zealot.GetComponent<IKController>().PressButton(pinPad.transform); }));
     }
 
     protected Node ApproachAndOrientTarget(GameObject a, Val<Vector3> target, Val<float> distance) {
@@ -228,12 +213,12 @@ public class BehaviorTree : MonoBehaviour {
         return new Sequence(mec(a).Node_GoTo(targetAdjusted), mec(a).Node_OrientTowards(target));
     }
 
-    protected Node ApproachTarget(GameObject a, Val<Vector3> target, Val<float> distance)
+    protected Node ApproachAndOrientUnderTarget(GameObject a, Val<Vector3> target, Val<float> distance)
     {
         Quaternion rotation = Quaternion.LookRotation(target.Value - a.transform.position);
-        Vector3 targetLoc = target.Value - (rotation * new Vector3(0, 0, distance.Value));
+        Vector3 targetLoc = target.Value - new Vector3(0, 0, distance.Value);
         Val<Vector3> targetAdjusted = Val.V(() => targetLoc);
-        return new Sequence(mec(a).Node_GoTo(targetAdjusted));
+        return new Sequence(mec(a).Node_GoTo(targetAdjusted), mec(a).Node_OrientTowards(target));
     }
 
     protected Node AngryGesture(GameObject guy, GameObject guard) {
@@ -259,12 +244,20 @@ public class BehaviorTree : MonoBehaviour {
             return (guy.transform.position - egg.transform.position).sqrMagnitude <= Mathf.Pow(distance, 2);
         };
         Val<Vector3> eggTarget = Val.V(() => egg.transform.position);
-        return new DecoratorLoop(new Sequence(new Selector(new LeafAssert(playerIsNearEgg), ApproachAndOrientTarget(guy, eggTarget, distance))
-                                              /*, mec(guy).Prayer() */));
+        return new DecoratorLoop(new Sequence(new Selector(new LeafAssert(playerIsNearEgg), ApproachAndOrientTarget(guy, eggTarget, distance)),
+                                              PrayToEgg(guy)));
     }
 
     protected Node PrayArc(GameObject[] guys) {
         return new ForEach<GameObject>(PrayArcFactory, guys);
+    }
+
+    protected Node PrayToEgg(GameObject player)
+    {
+        IKController ikc = player.GetComponent<IKController>();
+        return new Sequence(
+            new LeafInvoke(delegate {ikc.StartPrayer(player.transform, GameObject.FindGameObjectWithTag("Egg").transform);})
+            );
     }
 
     protected Wave[] getWaves()
