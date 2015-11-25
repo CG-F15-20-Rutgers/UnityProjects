@@ -57,11 +57,13 @@ public class BehaviorTree : MonoBehaviour {
     protected Node IntroTree() {
         Val<Vector3> target = Val.V(() => (follower1.transform.position + follower2.transform.position) / 2);
         float distance = 1.5f;
+        GameObject[] guards = getChildrenForWave(getWaves()[0], true);
         return new Sequence(
             ApproachAndOrient(follower1, follower2, target, distance),
             MaintainEyeContactWhileConversing(follower1, follower2, eyeHeight),
             new SequenceParallel(
-                AngryGesture(follower2, guard_l1)));
+                AngryGesture(follower2, guards[0]),
+                AngryGesture(follower1, guards[1])));
     }
 
     protected Node MaintainEyeContact(GameObject a, GameObject b, Vector3 eyeHeight) {
@@ -110,30 +112,28 @@ public class BehaviorTree : MonoBehaviour {
     // pragma mark new code.
 
     protected Node MiddleArc() {
-        Debug.Log("Middle arc being compiled");
         Wave[] waves = getWaves();
-        return new Sequence(new ForEach<Wave>(OpenDoorArc, waves));
+        return new Sequence(OpenDoorArc(waves[0]), OpenDoorArc(waves[1]), OpenDoorArc(waves[2]));
     }
 
     protected Node OpenDoorArc(Wave wave)
     {
+        GameObject[] guards = getChildrenForWave(wave, true);
+        zealots = GameObject.FindGameObjectsWithTag("Zealot");
+        Debug.Log(guards.Length);
         System.Action func = delegate
         {
             Debug.Log("Creating matchups");
-            GameObject[] guards = getChildrenForWave(wave, true);
-            zealots = GameObject.FindGameObjectsWithTag("Zealot");
-            Debug.Log("Loaded objects");
             for(int i = 0; i < guards.Length; i++)
             {
                 Debug.Log("Added mapping");
                 gzMappings.Add(guards[i], zealots[i]);
             }
         };
-        System.Action func2 = delegate
+        /*System.Action func2 = delegate
         {
             Debug.Log("Opening a door");
             GameObject pinPad = (getChildrenForWave(wave, false))[0];
-            zealots = GameObject.FindGameObjectsWithTag("Zealot");
             NavMeshAgent zealot = zealots[0].GetComponent<NavMeshAgent>();
             IKController ikc = zealot.GetComponent<IKController>();
             
@@ -155,16 +155,27 @@ public class BehaviorTree : MonoBehaviour {
                 }
             }
             end: {}
-        };
-        return new Sequence(new LeafInvoke(func),
-            new ForEach<GameObject>(AttackArc, gzMappings.Keys));
+        };*/
+        GameObject pinPad = getChildrenForWave(wave, false)[0];
+        return new Sequence(//new LeafInvoke(func),
+            new LeafInvoke(delegate {Debug.Log("Running attaack node");}),
+            new SequenceShuffle(
+                   AttackArc(guards[0], zealots[0]),
+                   AttackArc(guards[1], zealots[1])
+                ),
+            ApproachAndOrientTarget(zealots[0], Val.V(pinPad.transform.position), 2f),
+            new LeafInvoke(delegate { Debug.Log("ATK"); }),
+            new LeafInvoke(delegate { Debug.Log("Called"); zealots[0].GetComponent<IKController>().PressButton(pinPad.transform); Debug.Log("Invoked"); }),
+            new LeafWait(1200),
+            //new ForEach<GameObject>(AttackArc, gzMappings.Keys),
+            new LeafInvoke(delegate {Debug.Log("Finished attack node.");}));
             //new LeafInvoke(func2));
         }
 
-    protected Node AttackArc(GameObject guard) {
+    protected Node AttackArc(GameObject guard, GameObject zealot) {
         Debug.Log("Attack arc");
-        GameObject zealot;
-        gzMappings.TryGetValue(guard, out zealot);
+        //GameObject zealot;
+        //gzMappings.TryGetValue(guard, out zealot);
         Val<Vector3> target = Val.V(() => guard.transform.position);
         int iter = UnityEngine.Random.Range(3, 5);
         float distance = 5.0f;
@@ -176,9 +187,9 @@ public class BehaviorTree : MonoBehaviour {
         };
 
         // TODO: Implement FancyDeathAnimation
-        return new Sequence(ApproachAndOrientTarget(zealot, target, distance),
+        return new Sequence(//ApproachAndOrientTarget(zealot, target, distance),
                             new DecoratorLoop(iter,
-                                              new Sequence(mec(zealot).ST_PlayBodyGesture("NEW_PUNCH", 500),
+                                              new Sequence(mec(zealot).ST_PlayBodyGesture("FIGHT", 500),
                                               mec(guard).ST_PlayBodyGesture("NEW_PUNCH", 500))),
                             new LeafInvoke(func));
     }
@@ -215,6 +226,14 @@ public class BehaviorTree : MonoBehaviour {
         Vector3 targetLoc = target.Value - (rotation * new Vector3(0, 0, distance.Value));
         Val<Vector3> targetAdjusted = Val.V(() => targetLoc);
         return new Sequence(mec(a).Node_GoTo(targetAdjusted), mec(a).Node_OrientTowards(target));
+    }
+
+    protected Node ApproachTarget(GameObject a, Val<Vector3> target, Val<float> distance)
+    {
+        Quaternion rotation = Quaternion.LookRotation(target.Value - a.transform.position);
+        Vector3 targetLoc = target.Value - (rotation * new Vector3(0, 0, distance.Value));)
+        Val<Vector3> targetAdjusted = Val.V(() => targetLoc);
+        return new Sequence(mec(a).Node_GoTo(targetAdjusted));
     }
 
     protected Node AngryGesture(GameObject guy, GameObject guard) {
