@@ -62,7 +62,7 @@ public class BehaviorTree : MonoBehaviour {
         GameObject[] guards = getChildrenForWave(getWaves()[0], true);
         return new Sequence(
             ApproachAndOrient(follower1, follower2, target, distance),
-            MaintainEyeContactWhileConversing(follower1, follower2, eyeHeight),
+            //MaintainEyeContactWhileConversing(follower1, follower2, eyeHeight),
             new SequenceParallel(
                 AngryGesture(follower2, guards[0]),
                 AngryGesture(follower1, guards[1])));
@@ -136,26 +136,20 @@ public class BehaviorTree : MonoBehaviour {
         GameObject pinPad = getChildrenForWave(wave, false)[0];
         Vector3 pinPadPosition = pinPad.transform.position - new Vector3(-4, 0, 3);
         Debug.Log(pinPad.transform.position);
-        return new Sequence(//new LeafInvoke(func),
+        return new Sequence(
             new LeafInvoke(delegate {Debug.Log("Running attaack node");}),
             new SequenceParallel(
                    AttackArc(guards[0], zealots[0]),
                    AttackArc(guards[1], zealots[1])
                 ),
                 PressButton(zealots[1], pinPad),
-            //ApproachAndOrientUnderTarget(zealots[1], Val.V(pinPadPosition),0f),
-            //new LeafInvoke(delegate { Debug.Log("ATK"); }),
             new LeafInvoke(delegate { Debug.Log("Called"); zealots[1].GetComponent<IKController>().PressButton(pinPad.transform); Debug.Log("Invoked"); }),
             new LeafWait(1200),
-            //new ForEach<GameObject>(AttackArc, gzMappings.Keys),
             new LeafInvoke(delegate {Debug.Log("Finished attack node.");}));
-            //new LeafInvoke(func2));
         }
 
     protected Node AttackArc(GameObject guard, GameObject zealot) {
         Debug.Log("Attack arc");
-        //GameObject zealot;
-        //gzMappings.TryGetValue(guard, out zealot);
         Val<Vector3> target = Val.V(() => guard.transform.position);
         int iter = UnityEngine.Random.Range(1, 1);
         float distance = 5.0f;
@@ -166,7 +160,6 @@ public class BehaviorTree : MonoBehaviour {
             ikc.Die(guard.transform);
         };
 
-        // TODO: Implement FancyDeathAnimation
         return new Sequence(ApproachAndOrientUnderTarget(zealot, Val.V(guard.transform.position), 1f),
                             new DecoratorLoop(iter,
                                 new SequenceShuffle(
@@ -228,11 +221,54 @@ public class BehaviorTree : MonoBehaviour {
         System.Func<bool> playerIsNearEgg = delegate() {
             return (guy.transform.position - egg.transform.position).sqrMagnitude <= Mathf.Pow(checkDistance, 2);
         };
-        float angle = (numPrayerArcs++ * 30) + 15;
+        System.Func<bool> playerIsNotNearEgg = delegate()
+        {
+            return (guy.transform.position - egg.transform.position).sqrMagnitude > Math.Pow(checkDistance, 2);
+        };
+        float angle = (numPrayerArcs++ * -30) + 15;
         Quaternion rotation = Quaternion.EulerAngles(0, angle, 0);
         Val<Vector3> eggTarget = Val.V(() => egg.transform.position - new Vector3(0, egg.transform.position.y, 0) + (rotation * new Vector3(0, 0, 2)));
-        return new DecoratorLoop(new Sequence(new Selector(new LeafAssert(playerIsNearEgg), new Sequence(ApproachAndOrientUnderTarget(guy, eggTarget, distance), mec(guy).Node_OrientTowards(egg.transform.position - new Vector3(0, egg.transform.position.y, 0)), new LeafWait(1000))),
-                                              PrayToEgg(guy)));
+        return
+            new Sequence(
+                ApproachAndOrientUnderTarget(guy, eggTarget, distance),
+                mec(guy).Node_OrientTowards(egg.transform.position - new Vector3(0, egg.transform.position.y, 0)),
+                new LeafWait(500),
+                PrayToEgg(guy),
+                new DecoratorLoop(
+                    new LeafInvoke(delegate {
+                        SpeechBubbleController sbc = guy.GetComponent<SpeechBubbleController>();
+                        if (!sbc.IsBubbleVisible() && egg.transform.parent.GetComponent<ObjectController>().getState() != ObjectController.EggState.INACTIVE)
+                        {
+                            string[] messages = new string[] {
+                                "Woah!",
+                                "Uhm... is that supposed to happen?",
+                                "It's as awesome as I thought!",
+                                "This didn't happen in Mario Kart!",
+                                "This is eggzactly what I wanted to see!",
+                                "Is Yoshi in there?"
+                            };
+                            int index = UnityEngine.Random.Range(0, messages.Length - 1);
+                            guy.GetComponent<SpeechBubbleController>().DisplaySpeechBubble(messages[index]);
+                        }
+                    })
+                )
+            );
+            /*
+            new DecoratorLoop(
+                new DecoratorForceStatus(RunStatus.Success, 
+                    new Sequence(
+                        new DecoratorLoop(
+                            new Sequence(
+                                // continue while player is far from egg
+                                new LeafAssert(playerIsNotNearEgg),
+                                new Sequence(
+                                    ApproachAndOrientUnderTarget(guy, eggTarget, distance), 
+                                    mec(guy).Node_OrientTowards(egg.transform.position - new Vector3(0, egg.transform.position.y, 0)), 
+                                    new LeafWait(500)))),
+                        new LeafInvoke(delegate {Debug.Log("Praying now.");}),
+                        PrayToEgg(guy),
+                        new DecoratorLoop(new LeafAssert(playerIsNearEgg)),
+                        EndPrayer(guy))));*/
     }
 
     protected Node PrayArc() {
@@ -246,6 +282,15 @@ public class BehaviorTree : MonoBehaviour {
         IKController ikc = player.GetComponent<IKController>();
         return new Sequence(
             new LeafInvoke(delegate {ikc.StartPrayer(player.transform, GameObject.FindGameObjectWithTag("Egg").transform);})
+            );
+    }
+
+    protected Node EndPrayer(GameObject player)
+    {
+        IKController ikc = player.GetComponent<IKController>();
+        return new Sequence(
+            new LeafInvoke(delegate {ikc.EndPrayer(GameObject.FindGameObjectWithTag("Egg").transform); }),
+            new LeafWait(1000)
             );
     }
 
