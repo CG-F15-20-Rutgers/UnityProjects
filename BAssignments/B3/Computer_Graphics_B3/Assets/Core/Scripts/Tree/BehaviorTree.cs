@@ -63,8 +63,8 @@ public class BehaviorTree : MonoBehaviour
 
     protected Node BuildTreeRoot()
     {
-        return new Sequence(DesignateThiefNode(),
-            new DecoratorLoop(0, DirectShoppersNode()));
+        DesignateThief();
+        return new Sequence(DirectShoppersNode());
     }
 
 
@@ -82,24 +82,24 @@ public class BehaviorTree : MonoBehaviour
 
     protected Node Converse(GameObject a, GameObject b)
     {
-        return new Sequence(Speak(a, "Hello!", "WAVE"),
-                            Speak(b, "Hi!", "WAVE"),
-                            Speak(a, "Have you got the product?", "THINK"),
-                            Speak(b, "I think someone already picked it up...", "THINK"),
-                            Speak(b, "I'm sorry", "HANDSUP"),
-                            Speak(a, "Well, I'll just go get it from someone else", "WAVE"),
-                            Speak(b, "See you later friend", "WAVE"));
+        return new Sequence(Speak(a, "", "WAVE"),
+                            Speak(b, "", "WAVE"),
+                            Speak(a, "", "THINK"),
+                            Speak(b, "", "THINK"),
+                            Speak(b, "", "HANDSUP"),
+                            Speak(a, "", "WAVE"),
+                            Speak(b, "", "WAVE"));
     }
 
     protected Node ConverseBoth(GameObject a)
     {
-        return new Sequence(Speak(a, "Hello!", "WAVE"),
-                            SpeakOther(a, "Hi!", "WAVE"),
-                            Speak(a, "Have you got the product?", "THINK"),
-                            SpeakOther(a, "I think someone already picked it up...", "THINK"),
-                            SpeakOther(a, "I'm sorry", "HANDSUP"),
-                            Speak(a, "Well, I'll just go get it from someone else", "WAVE"),
-                            SpeakOther(a, "See you later friend", "WAVE"));
+        return new Sequence(Speak(a, "Hi!", "WAVE"),
+                            SpeakOther(a, "Welcome!", "WAVE"),
+                            Speak(a, "", "THINK"),
+                            SpeakOther(a, "", "THINK"),
+                            SpeakOther(a, "", "HANDSUP"),
+                            Speak(a, "See ya!", "WAVE"),
+                            SpeakOther(a, "Bye!", "WAVE"));
     }
 
     protected Node MaintainEyeContactWhileConversing(GameObject a, GameObject b, Vector3 eyeHeight)
@@ -141,7 +141,6 @@ public class BehaviorTree : MonoBehaviour
 
     protected Node ApproachAndOrientUnderTarget(GameObject a, Val<Vector3> target, Val<float> distance)
     {
-        Quaternion rotation = Quaternion.LookRotation(target.Value - a.transform.position);
         Vector3 targetLoc = target.Value - new Vector3(0, 0, distance.Value);
         Val<Vector3> targetAdjusted = Val.V(() => targetLoc);
         return new Sequence(mec(a).Node_GoTo(targetAdjusted), mec(a).Node_OrientTowards(target));
@@ -164,30 +163,35 @@ public class BehaviorTree : MonoBehaviour
         };
     }
 
-    protected Node DesignateThiefNode()
-    {
-        return new LeafInvoke(
-            () => DesignateThief());
-    }
     protected void DesignateThief()
     {
         GameObject[] shoppers = GameObject.FindGameObjectsWithTag("Shopper");
         int index = UnityEngine.Random.Range(0, shoppers.Length - 1);
         shoppers[index].tag = "Thief";
+        shoppers[index].AddComponent<ThiefMeta>();
     }
 
     protected Node DirectShoppersNode()
     {
         GameObject[] shoppers = GameObject.FindGameObjectsWithTag("Shopper");
         GameObject[] thief = GameObject.FindGameObjectsWithTag("Thief");
-        return new Sequence(
+        Debug.Log("Found " + thief.Length + " thieves");
+        return new SequenceParallel(
                 new ForEach<GameObject>(RepeatedShopArc, shoppers),
-                new ForEach<GameObject>(RepeatedShopArc, thief)
+                new ForEach<GameObject>(RepeatedTheftArc, thief)
             );
+    }
+    protected Node RepeatedTheftArc(GameObject thief)
+    {
+        int num_iter = UnityEngine.Random.Range(1, 3);
+        return new Sequence(
+            new DecoratorLoop(num_iter, ShopArc(thief)),
+            TheftArc(thief)
+        );
     }
     protected Node RepeatedShopArc(GameObject shopper)
     {
-        return new DecoratorLoop(6, ShopArc(shopper));
+        return new DecoratorLoop(4, ShopArc(shopper));
     }
     protected Node ShopArc(GameObject shopper)
     {
@@ -199,17 +203,39 @@ public class BehaviorTree : MonoBehaviour
                mec(shopper).Node_LeaveShop()
         );
     }
-    protected Node Shop(GameObject shopper, Val<GameObject> salesman, Val<GameObject> stallSpot)
+    protected Node TheftArc(GameObject thief)
     {
         return new Sequence(
-                MaintainEyeContactWhileConversing(shopper, salesman.Value, eyeHeight),
-                new LeafInvoke(
-                        delegate
-                        {
-                            stallSpot.Value.tag = "PurchaseEmpty";
-                        }
-                    )
-            );
+                mec(thief).Node_ChooseNextShop(),
+                mec(thief).Node_GoToNextShop(),
+                mec(thief).Node_OrientTowardsShop(),
+                Speak(thief, "I want that lamp!", "HANDSUP"),
+                SpeakOther(thief, "You need to buy it!", "HANDSUP"),
+                Speak(thief, "No! I'll steal it!", "HANDSUP"),
+                SpeakOther(thief, "The guards will stop you!", "HANDSUP"),
+                Speak(thief, "We shall see....", "HANDSUP"),
+                mec(thief).Node_ChooseTheftTarget(),
+                mec(thief).Node_OrientTowardsLamp(),
+                mec(thief).Node_PointAtLamp(),
+                new LeafWait(600L),
+                mec(thief).Node_PullLamp(),
+                new LeafWait(1600L),
+                new SequenceParallel(
+                    new ForEach<GameObject>(ChaseThief, GameObject.FindGameObjectsWithTag("Guard")),
+                    new Sequence(mec(thief).Node_Escape(),
+                        new ForEach<GameObject>(StopGuard, GameObject.FindGameObjectsWithTag("Guard")),
+                        new LeafInvoke(delegate { this.gameObject.GetComponent<SceneController>().state = SceneState.ENDING; })
+                        ))
+        );
+    }
+    protected Node StopGuard(GameObject guard)
+    {
+        return new LeafInvoke(() => mec(guard).Character.NavStop());
+    }
+    protected Node ChaseThief(GameObject guard)
+    {
+        GameObject thief = GameObject.FindGameObjectWithTag("Thief");
+        return new Sequence(mec(guard).Node_Chase(thief));
     }
 
     protected Node d(string msg)

@@ -50,6 +50,12 @@ public class BehaviorMecanim : MonoBehaviour
             );
     }
 
+    public Node Node_ChooseTheftTarget()
+    {
+        return new LeafInvoke(
+            () => this.Character.ChooseTheftTarget());
+    }
+
     public Node Node_GoToNextShop()
     {
         return new LeafInvoke(
@@ -136,7 +142,7 @@ public class BehaviorMecanim : MonoBehaviour
                 Vector3 curPos = this.transform.position;
                 if ((targPos - curPos).magnitude < dist.Value)
                 {
-                    Debug.Log("Reached target.");
+
                     this.Character.NavStop();
                     return RunStatus.Success;
                 }
@@ -280,6 +286,38 @@ public class BehaviorMecanim : MonoBehaviour
     public Node Node_PointAt(Val<Transform> pointTargetTransform, Val<bool> useRightHand)
     {
         return new LeafInvoke(() => this.Character.PointAt(pointTargetTransform.Value, useRightHand.Value));
+    }
+
+    public Node Node_OrientTowardsLamp()
+    {
+        return new LeafInvoke(
+            () => this.Character.FaceLamp());
+    }
+
+    public Node Node_PointAtLamp()
+    {
+        return new LeafInvoke(
+            () => this.Character.PointAtLamp()
+            );
+    }
+
+    public Node Node_PullLamp()
+    {
+        return new LeafInvoke(
+            () => this.Character.PullLamp()
+            );
+    }
+
+    public Node Node_Escape()
+    {
+        return new LeafInvoke(
+            () => this.Character.NavEscape());
+    }
+
+    public Node Node_Chase(GameObject targ)
+    {
+        return new LeafInvoke(
+            () => this.Character.NavChase(Val.V(() => targ)));
     }
 
     #endregion

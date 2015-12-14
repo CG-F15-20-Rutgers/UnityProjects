@@ -136,6 +136,15 @@ public class CharacterMecanim : MonoBehaviour
         }
     }
 
+    public virtual RunStatus ChooseTheftTarget()
+    {
+        Transform stall = this.gameObject.GetComponent<ShopperMeta>().stallSpot.transform.parent;
+        int lampIndex = UnityEngine.Random.Range(1, 3);
+        GameObject lamp = stall.FindChild("Lamps").FindChild("L" + lampIndex).gameObject;
+        this.gameObject.GetComponent<ThiefMeta>().lamp = lamp;
+        return RunStatus.Success;
+    }
+
     public virtual RunStatus NavGoToNextShop()
     {
             ShopperMeta sm = this.gameObject.GetComponent<ShopperMeta>();
@@ -150,6 +159,42 @@ public class CharacterMecanim : MonoBehaviour
         Vector3 pos = sm.stallSpot.transform.position;
         pos.z -= 2;
         return NavTurn(Val.V(() => pos));
+    }
+
+    public virtual RunStatus NavEscape()
+    {
+        GameObject[] escapePoints = GameObject.FindGameObjectsWithTag("ThiefEscapePoint");
+        int minInd = 0;
+        float min = 0;
+        for (int i = 0; i < escapePoints.Length; i++)
+        {
+            float dist = (escapePoints[i].transform.position - transform.position).sqrMagnitude;
+            if(dist < min || i == 0)
+            {
+                minInd = i;
+                min = dist;
+            }
+        }
+        return NavGoTo(escapePoints[minInd].transform.position);
+    }
+
+    public virtual RunStatus NavChase(Val<GameObject> target)
+    {
+        this.gameObject.GetComponent<UnitySteeringController>().maxSpeed = 6.0f;
+        if(this.Body.NavCanReach(target.Value.transform.position) == false)
+        {
+            return RunStatus.Failure;
+        }
+        this.Body.NavGoTo(target.Value.transform.position);
+
+        float sqdist = (target.Value.transform.position - this.transform.position).sqrMagnitude;
+
+        if (sqdist < 16.0f)
+        {
+            this.Body.NavStop();
+            return RunStatus.Success;
+        }
+        return RunStatus.Running;
     }
 
 
@@ -173,7 +218,6 @@ public class CharacterMecanim : MonoBehaviour
         this.Body.NavGoTo(target.Value);
         if (this.Body.NavHasArrived() == true)
         {
-            Debug.Log("Made it!");
             this.Body.NavStop();
             return RunStatus.Success;
         }
@@ -351,6 +395,26 @@ public class CharacterMecanim : MonoBehaviour
     public virtual RunStatus PointAt(Transform pointTargetTransform, bool useRightHand)
     {
         GetComponent<IKController>().PointAt(transform, pointTargetTransform, false);
+        return RunStatus.Success;
+    }
+
+    public virtual RunStatus FaceLamp()
+    {
+        return NavTurn(Val.V(() => GetComponent<ThiefMeta>().lamp.transform.position));
+    }
+
+    public virtual RunStatus PointAtLamp()
+    {
+        return PointAt(gameObject.GetComponent<ThiefMeta>().lamp.transform, true);
+    }
+
+    public virtual RunStatus PullLamp()
+    {
+        GameObject lamp = this.gameObject.GetComponent<ThiefMeta>().lamp.gameObject;
+        LampController lc = lamp.AddComponent<LampController>();
+        lc.thief = this.gameObject;
+        lc.primary = lamp.transform.position;
+        this.gameObject.GetComponent<UnitySteeringController>().maxSpeed = 8.0f;
         return RunStatus.Success;
     }
 

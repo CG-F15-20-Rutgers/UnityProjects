@@ -31,28 +31,29 @@ public class SpeechBubbleController : MonoBehaviour {
     {
         if (isBubbleVisible)
         {
-            Vector2 position = Camera.main.WorldToScreenPoint(gameObject.transform.position + new Vector3(0, 2.8f, 0));
+            Vector2 position = Camera.main.WorldToScreenPoint(gameObject.transform.position + new Vector3(0, 2.2f, 0));
             GUIStyle gs = new GUIStyle();
             position.y = Screen.height - position.y;
+            position.x -= 60;
             gs.alignment = TextAnchor.MiddleCenter;
             gs.font = font;
             gs.fontSize = 12;
             gs.fontStyle = FontStyle.Bold;
             gs.normal.textColor = new Color(0.3f, 0.3f, 0.3f);
 
-            position.x -= 1;
-            position.y -= 1;
-            GUI.Label(new Rect(position, new Vector2(0, 0)), message, gs);
-            position.x += 2;
-            GUI.Label(new Rect(position, new Vector2(0, 0)), message, gs);
-            position.y += 2;
-            GUI.Label(new Rect(position, new Vector2(0, 0)), message, gs);
             position.x -= 2;
-            GUI.Label(new Rect(position, new Vector2(0, 0)), message, gs);
+            position.y -= 2;
+            GUI.Label(new Rect(position, new Vector2(120, 0)), message, gs);
+            position.x += 4;
+            GUI.Label(new Rect(position, new Vector2(120, 0)), message, gs);
+            position.y += 4;
+            GUI.Label(new Rect(position, new Vector2(120, 0)), message, gs);
+            position.x -= 4;
+            GUI.Label(new Rect(position, new Vector2(120, 0)), message, gs);
             gs.normal.textColor = Color.white;
-            position.x += 1;
-            position.y -= 1;
-            GUI.Label(new Rect(position, new Vector2(0, 0)), message, gs);
+            position.x += 2;
+            position.y -= 2;
+            GUI.Label(new Rect(position, new Vector2(120, 0)), message, gs);
         }
     }
 

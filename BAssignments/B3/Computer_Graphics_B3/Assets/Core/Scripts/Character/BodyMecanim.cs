@@ -405,6 +405,9 @@ public class BodyMecanim : MonoBehaviour
 		case "NEW_PRAYING":
 			this.animator.SetBool("B_new_Praying", isActive);
 			break;
+        case "CAST_SPELL":
+            this.animator.SetBool("B_casting_spell", isActive);
+            break;
 
 		}
 	}
