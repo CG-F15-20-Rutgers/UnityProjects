@@ -39,20 +39,20 @@ public class SpeechBubbleController : MonoBehaviour {
             gs.font = font;
             gs.fontSize = 12;
             gs.fontStyle = FontStyle.Bold;
-            gs.normal.textColor = new Color(0.3f, 0.3f, 0.3f);
+            gs.normal.textColor = new Color(0.1f, 0.1f, 0.1f);
 
+            position.x -= 1;
+            position.y -= 1;
+            GUI.Label(new Rect(position, new Vector2(120, 0)), message, gs);
+            position.x += 2;
+            GUI.Label(new Rect(position, new Vector2(120, 0)), message, gs);
+            position.y += 2;
+            GUI.Label(new Rect(position, new Vector2(120, 0)), message, gs);
             position.x -= 2;
-            position.y -= 2;
-            GUI.Label(new Rect(position, new Vector2(120, 0)), message, gs);
-            position.x += 4;
-            GUI.Label(new Rect(position, new Vector2(120, 0)), message, gs);
-            position.y += 4;
-            GUI.Label(new Rect(position, new Vector2(120, 0)), message, gs);
-            position.x -= 4;
             GUI.Label(new Rect(position, new Vector2(120, 0)), message, gs);
             gs.normal.textColor = Color.white;
-            position.x += 2;
-            position.y -= 2;
+            position.x += 1;
+            position.y -= 1;
             GUI.Label(new Rect(position, new Vector2(120, 0)), message, gs);
         }
     }
