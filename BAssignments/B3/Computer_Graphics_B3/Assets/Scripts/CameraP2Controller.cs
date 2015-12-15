@@ -9,14 +9,12 @@ public class CameraP2Controller : MonoBehaviour {
     public UnityEngine.UI.Text hint;
 
     private Animator anim; // a reference to the animator on the character
-    private Rigidbody rb;
     private GameObject dismissableNPC;
 
     void Start()
     {
         // initialising reference variables
         anim = GetComponent<Animator>();
-        rb = GetComponent<Rigidbody>();
         if (anim.layerCount == 2)
         {
             anim.SetLayerWeight(1, 1);
