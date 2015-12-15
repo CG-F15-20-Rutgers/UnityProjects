@@ -21,6 +21,8 @@ public class SceneController : MonoBehaviour {
     private float currAnimTick;
     private float maxAnimTime;
 
+    public string endMessage = "That's how the lamp was stolen...";
+
 	// Use this for initialization
 	void Start () {
         state = SceneState.ACTIVE;
@@ -92,7 +94,7 @@ public class SceneController : MonoBehaviour {
         gs.fontStyle = FontStyle.Bold;
         gs.normal.textColor = new Color(1.0f, 1.0f, 1.0f, 1.0f);
 
-        GUI.Label(new Rect(Screen.width / 2, Screen.height / 2, 0, 0), "That's how the lamp was stolen...", gs);
+        GUI.Label(new Rect(Screen.width / 2, Screen.height / 2, 0, 0), endMessage, gs);
 
     }
 }

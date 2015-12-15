@@ -12,7 +12,7 @@ public class CameraP1Controller : MonoBehaviour {
 	void Update () {
         float MoveX = Input.GetAxis("Horizontal") / 2;
         float MoveZ = Input.GetAxis("Vertical") / 2;
-        float RotY = Input.GetAxis("RotHoriz") * 4;
+        float RotY = Input.GetAxis("RotHoriz") * 10;
         Quaternion rotationForward = transform.rotation;
         rotationForward.x = 0;
         rotationForward.z = 0;

@@ -29,7 +29,7 @@ public class SpeechBubbleController : MonoBehaviour {
 
     void OnGUI()
     {
-        if (isBubbleVisible)
+        if (isBubbleVisible && CameraCanSee())
         {
             Vector2 position = Camera.main.WorldToScreenPoint(gameObject.transform.position + new Vector3(0, 2.2f, 0));
             GUIStyle gs = new GUIStyle();
@@ -74,5 +74,11 @@ public class SpeechBubbleController : MonoBehaviour {
     public bool IsBubbleVisible()
     {
         return isBubbleVisible;
+    }
+
+    private bool CameraCanSee()
+    {
+        Vector3 viewport = Camera.main.WorldToViewportPoint(transform.position + new Vector3(0, 2.2f, 0));
+        return viewport.z > 0 && viewport.x >= 0 && viewport.x <= 1 && viewport.y >= 0 && viewport.y <= 1;
     }
 }

@@ -308,6 +308,12 @@ public class BehaviorMecanim : MonoBehaviour
             );
     }
 
+    public Node Node_DropAll()
+    {
+        return new LeafInvoke(
+            () => this.Character.DropAll());
+    }
+
     public Node Node_Escape()
     {
         return new LeafInvoke(
