@@ -386,10 +386,8 @@ public class IKController : MonoBehaviour
 
         public Vector3 calculateHandPosition(Transform player, Transform target, bool useRightHand)
         {
-            Vector3 tg = target.position - player.position;
-            tg.Normalize();
-            tg = 0.3f * tg + player.position;
-            tg.y = 2f;
+            Vector3 tg = player.position + Quaternion.LookRotation(player.forward) * new Vector3(0, 0, 0.3f);
+            tg.y = 1.8f;
             if (useRightHand && target.position.x > player.position.x)
             {
                 Quaternion rotation = Quaternion.LookRotation(player.forward);
