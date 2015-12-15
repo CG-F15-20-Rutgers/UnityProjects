@@ -421,14 +421,16 @@ public class CharacterMecanim : MonoBehaviour
     public virtual RunStatus DropAll()
     {
         GameObject lamp = this.gameObject.GetComponent<ThiefMeta>().lamp.gameObject;
-        LampController lc = lamp.GetComponent<LampController>();
-        lc.enabled = false;
+        if (lamp != null)
+        {
+            LampController lc = lamp.GetComponent<LampController>();
+            lc.enabled = false;
 
-        // Make the lamp fall down
-        Rigidbody rb = lamp.AddComponent<Rigidbody>();
-        rb.useGravity = true;
-        BoxCollider bc = lamp.AddComponent<BoxCollider>();
-
+            // Make the lamp fall down
+            Rigidbody rb = lamp.AddComponent<Rigidbody>();
+            rb.useGravity = true;
+            BoxCollider bc = lamp.AddComponent<BoxCollider>();
+        }
         this.gameObject.GetComponent<UnitySteeringController>().maxSpeed = 8.5f;
         return RunStatus.Success;
     }
