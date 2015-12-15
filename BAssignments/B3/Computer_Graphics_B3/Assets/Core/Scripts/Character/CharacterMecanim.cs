@@ -420,7 +420,7 @@ public class CharacterMecanim : MonoBehaviour
 
     public virtual RunStatus DropAll()
     {
-        GameObject lamp = this.gameObject.GetComponent<ThiefMeta>().lamp.gameObject;
+        GameObject lamp = this.gameObject.GetComponent<ThiefMeta>().lamp;
         if (lamp != null)
         {
             LampController lc = lamp.GetComponent<LampController>();
