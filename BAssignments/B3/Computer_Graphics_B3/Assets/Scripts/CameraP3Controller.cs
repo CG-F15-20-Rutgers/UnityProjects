@@ -192,8 +192,6 @@ public class CameraP3Controller : MonoBehaviour {
             else if (player.CompareTag("Shopper"))
             {
                 character = CharacterClass.SHOPPER;
-                // Reset the navigation.
-                player.GetComponent<NavMeshAgent>().ResetPath();
             }
             else if (player.CompareTag("Guard"))
             {
@@ -222,11 +220,6 @@ public class CameraP3Controller : MonoBehaviour {
     public GameObject ReleasePlayer()
     {
         GameObject retval = possessedCharacter;
-        // Tell the shopper to go shop at his table.
-        if (retval != null && character == CharacterClass.SHOPPER)
-        {
-            retval.GetComponent<BehaviorMecanim>().Character.NavGoToNextShop();
-        }
         possessedCharacter = null;
         PossessionScript ps = retval.GetComponent<PossessionScript>();
         ps.IsPossessed = false;

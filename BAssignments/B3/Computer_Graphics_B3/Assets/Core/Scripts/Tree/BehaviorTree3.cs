@@ -182,8 +182,9 @@ public class BehaviorTree3 : MonoBehaviour
     }
     protected Node SynchronizedShopArc(GameObject shopper)
     {
-        return new SequenceParallel(new PossessionNode(UnPossessedShopArc(shopper), shopper, false),
-                                    new PossessionNode(PossessedShopArc(shopper), shopper, true));
+        // return new SequenceParallel(new PossessionNode(UnPossessedShopArc(shopper), shopper, false),
+        //   new PossessionNode(PossessedShopArc(shopper), shopper, true));
+        return new PossessionCoordinatorNode(shopper, PossessedShopArc(shopper), UnPossessedShopArc(shopper), ShopPosTrans(shopper), ShopUnposTrans(shopper));
     }
     protected Node UnPossessedShopArc(GameObject shopper)
     {
@@ -217,13 +218,21 @@ public class BehaviorTree3 : MonoBehaviour
         return new DecoratorLoop(new LeafInvoke(delegate {
             float v = Input.GetAxis("Vertical");
             float h = Input.GetAxis("Horizontal");
-                Vector3 target = shopper.transform.position + v * (Quaternion.Euler(0, h * 20, 0) * shopper.transform.forward);
-                Vector3 targetDirection = shopper.transform.position + 10 * (Quaternion.Euler(0, h * 40, 0) * shopper.transform.forward);
-                if (mec(shopper).Character.NavGoTo(target) == RunStatus.Failure)
-                    mec(shopper).Character.NavStop();
-                if (mec(shopper).Character.NavTurn(targetDirection) == RunStatus.Failure)
-                    mec(shopper).Character.NavOrientBehavior(OrientationBehavior.LookForward);
+            Vector3 target = shopper.transform.position + v * (Quaternion.Euler(0, h * 20, 0) * shopper.transform.forward);
+            Vector3 targetDirection = shopper.transform.position + 10 * (Quaternion.Euler(0, h * 40, 0) * shopper.transform.forward);
+            if (mec(shopper).Character.NavGoTo(target) == RunStatus.Failure)
+               mec(shopper).Character.NavStop();
+            if (mec(shopper).Character.NavTurn(targetDirection) == RunStatus.Failure)
+               mec(shopper).Character.NavOrientBehavior(OrientationBehavior.LookForward);
         }));
+    }
+    protected Node ShopPosTrans(GameObject shopper) {
+        // Reset the navigation.
+        return new LeafInvoke(() => shopper.GetComponent<NavMeshAgent>().ResetPath());
+    }
+    protected Node ShopUnposTrans(GameObject shopper) {
+        // Tell the shopper to go shop at his table.
+        return new Sequence(mec(shopper).Node_GoToNextShop(), mec(shopper).Node_OrientTowardsShop());
     }
     protected Node SynchronizedTheftArc(GameObject thief)
     {
