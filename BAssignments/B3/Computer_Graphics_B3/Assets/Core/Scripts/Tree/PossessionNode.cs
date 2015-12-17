@@ -77,13 +77,13 @@ public class PossessionNode : Node
         RunStatus result;
         while(true)
         {
-            if (IsObjectDismissed())
+            if (!CanExecuteForPossession())
             {
-               result = RunStatus.Success;
-               break;
-            }
-            else if (!CanExecuteForPossession())
-            {
+                if (IsObjectDismissed())
+                {
+                    result = RunStatus.Success;
+                    break;
+                }
                 yield return RunStatus.Running;
             }
             else

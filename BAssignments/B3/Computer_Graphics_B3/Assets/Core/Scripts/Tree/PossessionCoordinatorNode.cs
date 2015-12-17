@@ -66,9 +66,9 @@ public class PossessionCoordinatorNode : Node
         bool lastPossession = IsPossessed();
         RunStatus retStatus;
         while (true) {
-            if (IsObjectDismissed()) {
-                retStatus = RunStatus.Success; break;
-            }
+            //if (IsObjectDismissed()) {
+            //    retStatus = RunStatus.Success; break;
+            //}
 
             // See which node we should evaluate. If a transition has occurred, we evaluate the respective transition node.
             // Otherwise, we evaluate the last ticked transition node or the possessionNode.
