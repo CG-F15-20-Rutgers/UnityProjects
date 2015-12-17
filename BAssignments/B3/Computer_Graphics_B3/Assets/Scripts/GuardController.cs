@@ -57,7 +57,10 @@ public class GuardController : MonoBehaviour {
         {
             dismissableNPC = other.gameObject;
             wasPossessed = IsPossessed();
-            hint.gameObject.SetActive(wasPossessed && CanDismissNPC());
+            if (wasPossessed)
+            {
+                hint.gameObject.SetActive(CanDismissNPC());
+            }
         }
     }
 
@@ -66,7 +69,10 @@ public class GuardController : MonoBehaviour {
         if (other.gameObject.Equals(dismissableNPC))
         {
             dismissableNPC = null;
-            hint.gameObject.SetActive(false);
+            if (wasPossessed)
+            {
+                hint.gameObject.SetActive(false);
+            }
         }
     }
 

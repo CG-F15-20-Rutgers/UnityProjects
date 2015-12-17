@@ -204,9 +204,10 @@ public class BehaviorTree3 : MonoBehaviour
                             new LeafAssert(() => IsNotDismissed(shopper))
                         ),
                         new Sequence(
-                            new LeafAssert(() => IsNotActive(shopper))  
+                            new LeafAssert(() => IsNotActive(shopper))
                         ),
                         new Sequence(
+                            new LeafInvoke(() => shopper.GetComponent<NavMeshAgent>().Resume()),
                             mec(shopper).Node_Escape(),
                             new LeafInvoke(() => shopper.SetActive(false))
                         )
