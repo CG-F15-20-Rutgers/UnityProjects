@@ -214,7 +214,15 @@ public class BehaviorTree3 : MonoBehaviour
     }
     protected Node PossessedShopArc(GameObject shopper)
     {
-        return new LeafInvoke(() => shopper.GetComponent<UnitySteeringController>().Stop());
+        return new DecoratorLoop(new LeafInvoke(delegate {
+            float v = Input.GetAxis("Vertical");
+            float h = Input.GetAxis("Horizontal");
+            if (v != 0)
+            {
+                Vector3 target = shopper.transform.position + (Quaternion.Euler(0, h * 20, 0) * shopper.transform.forward);
+                mec(shopper).Character.NavGoTo(target);
+            }
+        }));
     }
     protected Node SynchronizedTheftArc(GameObject thief)
     {
