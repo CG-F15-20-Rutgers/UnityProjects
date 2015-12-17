@@ -182,6 +182,11 @@ public class BehaviorTree3 : MonoBehaviour
     }
     protected Node SynchronizedShopArc(GameObject shopper)
     {
+        return new SequenceParallel(new PossessionNode(UnPossessedShopArc(shopper), shopper, false),
+                                    new PossessionNode(PossessedShopArc(shopper), shopper, true));
+    }
+    protected Node UnPossessedShopArc(GameObject shopper)
+    {
         return new Sequence(
                 new DecoratorForceStatus(
                     RunStatus.Success,
@@ -206,6 +211,10 @@ public class BehaviorTree3 : MonoBehaviour
                         )
                 )
             );
+    }
+    protected Node PossessedShopArc(GameObject shopper)
+    {
+        return new LeafInvoke(() => shopper.GetComponent<UnitySteeringController>().Stop());
     }
     protected Node SynchronizedTheftArc(GameObject thief)
     {
