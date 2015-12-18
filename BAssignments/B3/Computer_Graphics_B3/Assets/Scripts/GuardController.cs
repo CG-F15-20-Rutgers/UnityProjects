@@ -9,6 +9,12 @@ public class GuardController : MonoBehaviour {
     public UnityEngine.UI.Text hint;
 
     private bool wasPossessed;
+    private UnitySteeringController steering;
+
+    void Start()
+    {
+        steering = GetComponent<UnitySteeringController>();
+    }
 
     void Update()
     {
@@ -31,23 +37,22 @@ public class GuardController : MonoBehaviour {
 
     void HandleInput()
     {
-        // Control code copied from BehaviorTree3.cs@PossessedShopArc(GameObject).
-        float v = Input.GetAxis("Vertical");
-        float h = Input.GetAxis("Horizontal");
-        Vector3 target = transform.position + v * (Quaternion.Euler(0, h * 20, 0) * transform.forward);
-        Vector3 targetDirection = transform.position + 10 * (Quaternion.Euler(0, h * 40, 0) * transform.forward);
-        if (mec(gameObject).Character.NavGoTo(target) == RunStatus.Failure)
-            mec(gameObject).Character.NavStop();
-        if (mec(gameObject).Character.NavTurn(targetDirection) == RunStatus.Failure) ;
-             mec(gameObject).Character.NavOrientBehavior(OrientationBehavior.LookForward);
+        float Vertical = Input.GetAxis("Vertical");
+        float Horizontal = Input.GetAxis("Horizontal");
+        steering.Target = transform.position + Quaternion.LookRotation(transform.forward) * new Vector3(Horizontal / 2, 0, Vertical) * 5;
+        steering.maxSpeed = 3;
+        if (Input.GetKey(KeyCode.LeftShift)) steering.maxSpeed = 6;
+        if (Vertical == 0 && Horizontal != 0)
+        {
+            steering.orientationBehavior = OrientationBehavior.None;
+            steering.SetDesiredOrientation(transform.position + Quaternion.Euler(0, Horizontal * 50, 0) * transform.forward * 5);
+            if (steering.IsFacing()) steering.orientationBehavior = OrientationBehavior.LookForward;
+        }
 
         if (Input.GetKeyDown(KeyCode.Space) && hint.gameObject.activeSelf && dismissableNPC != null)
         {
             GetComponent<SpeechBubbleController>().DisplaySpeechBubble("Sir, I'm going to have to ask you to leave.");
             dismissableNPC.GetComponent<PossessionScript>().IsDismissed = true;
-
-            // Hide the Hint b/c we just dismissed him.
-            hint.gameObject.SetActive(false);
         }
     }
 

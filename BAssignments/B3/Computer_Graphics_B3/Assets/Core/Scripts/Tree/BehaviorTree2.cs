@@ -169,6 +169,7 @@ public class BehaviorTree2 : MonoBehaviour
         int index = UnityEngine.Random.Range(0, shoppers.Length - 1);
         shoppers[index].tag = "Thief";
         shoppers[index].AddComponent<ThiefMeta>();
+        shoppers[index].GetComponent<BoxCollider>().enabled = true;
     }
 
     protected Node DirectShoppersNode()
@@ -190,6 +191,8 @@ public class BehaviorTree2 : MonoBehaviour
                         RepeatedShopArc(shopper)
                     )
                 ),
+                new LeafInvoke(() => shopper.GetComponent<NavMeshAgent>().ResetPath()),
+                new LeafInvoke(() => shopper.GetComponent<NavMeshAgent>().Resume()),
                 mec(shopper).Node_Escape(),
                 new LeafInvoke(() => shopper.SetActive(false))
             );
@@ -204,6 +207,8 @@ public class BehaviorTree2 : MonoBehaviour
                         RepeatedTheftArc(thief)
                     )
                 ),
+                new LeafInvoke(() => thief.GetComponent<NavMeshAgent>().ResetPath()),
+                new LeafInvoke(() => thief.GetComponent<NavMeshAgent>().Resume()),
                 mec(thief).Node_DropAll(),
                 new ForEach<GameObject>(StopGuard, GameObject.FindGameObjectsWithTag("Guard")),
                 mec(thief).Node_Escape(),

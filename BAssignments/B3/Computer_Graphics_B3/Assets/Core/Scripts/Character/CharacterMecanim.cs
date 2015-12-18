@@ -388,6 +388,20 @@ public class CharacterMecanim : MonoBehaviour
     public virtual RunStatus DisplaySpeechBubbleOther(string message, long duration)
     {
         GameObject salesman = this.gameObject.GetComponent<ShopperMeta>().salesman;
+        PossessionScript ps = salesman.GetComponent<PossessionScript>();
+        if (ps != null)
+        {
+            ps.waitForSpeak = true;
+            if (!ps.canSpeak)
+            {
+                return RunStatus.Running;
+            }
+            else
+            {
+                ps.waitForSpeak = false;
+                ps.canSpeak = false;
+            }
+        }
         salesman.GetComponent<SpeechBubbleController>().DisplaySpeechBubble(message, duration);
         return RunStatus.Success;
     }

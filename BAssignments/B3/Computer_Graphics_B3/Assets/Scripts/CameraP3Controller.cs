@@ -171,14 +171,7 @@ public class CameraP3Controller : MonoBehaviour {
 
     void UpdateSalesman()
     {
-        if (Input.GetKeyDown(KeyCode.Space))
-        {
-            SpeechBubbleController sbc = possessedCharacter.GetComponent<SpeechBubbleController>();
-            if (!sbc.IsBubbleVisible())
-            {
-                sbc.DisplaySpeechBubble("Hi there!");
-            }
-        }
+        // Do nothing
     }
 
     public void PossessPlayer(GameObject player)

@@ -169,6 +169,7 @@ public class BehaviorTree3 : MonoBehaviour
         int index = UnityEngine.Random.Range(0, shoppers.Length - 1);
         shoppers[index].tag = "Thief";
         shoppers[index].AddComponent<ThiefMeta>();
+        shoppers[index].transform.FindChild("Cube").gameObject.SetActive(true);
     }
 
     protected Node DirectShoppersNode()
@@ -182,49 +183,29 @@ public class BehaviorTree3 : MonoBehaviour
     }
     protected Node SynchronizedShopArc(GameObject shopper)
     {
-        // return new SequenceParallel(new PossessionNode(UnPossessedShopArc(shopper), shopper, false),
-        //   new PossessionNode(PossessedShopArc(shopper), shopper, true));
         return new PossessionCoordinatorNode(shopper, PossessedShopArc(shopper), UnPossessedShopArc(shopper), ShopPosTrans(shopper), ShopUnposTrans(shopper));
     }
     protected Node UnPossessedShopArc(GameObject shopper)
     {
         return new Sequence(
-                new DecoratorForceStatus(
-                    RunStatus.Success,
-                    new Sequence(
-                        new LeafAssert(() => IsShopperActive(shopper)),
-                        new SequenceParallel(
-                            new DecoratorLoop(new LeafAssert(() => IsShopperActive(shopper))),
-                            RepeatedShopArc(shopper)
-                        )
-                    )
-                ),
-                new Selector(
-                        new Sequence(
-                            new LeafAssert(() => IsNotDismissed(shopper))
-                        ),
-                        new Sequence(
-                            new LeafAssert(() => IsNotActive(shopper))
-                        ),
-                        new Sequence(
-                            new LeafInvoke(() => shopper.GetComponent<NavMeshAgent>().Resume()),
-                            mec(shopper).Node_Escape(),
-                            new LeafInvoke(() => shopper.SetActive(false))
-                        )
+            new DecoratorForceStatus(
+                RunStatus.Success,
+                new SequenceParallel(
+                    new DecoratorLoop(new LeafAssert(() => IsShopperActive(shopper))),
+                    RepeatedShopArc(shopper)
                 )
-            );
+            ),
+            mec(shopper).Node_DropAll(),
+            new LeafInvoke(() => shopper.GetComponent<NavMeshAgent>().ResetPath()),
+            new LeafInvoke(() => shopper.GetComponent<NavMeshAgent>().Resume()),
+            mec(shopper).Node_Escape(),
+            new LeafInvoke(() => shopper.SetActive(false))
+        );
     }
     protected Node PossessedShopArc(GameObject shopper)
     {
         return new DecoratorLoop(new LeafInvoke(delegate {
-           /* float v = Input.GetAxis("Vertical");
-            float h = Input.GetAxis("Horizontal");
-            Vector3 target = shopper.transform.position + v * (Quaternion.Euler(0, h * 20, 0) * shopper.transform.forward);
-            Vector3 targetDirection = shopper.transform.position + 10 * (Quaternion.Euler(0, h * 40, 0) * shopper.transform.forward);
-            if (mec(shopper).Character.NavGoTo(target) == RunStatus.Failure)
-               mec(shopper).Character.NavStop();
-            if (mec(shopper).Character.NavTurn(targetDirection) == RunStatus.Failure)
-               mec(shopper).Character.NavOrientBehavior(OrientationBehavior.LookForward);*/
+            // Do nothing
         }));
     }
     protected Node ShopPosTrans(GameObject shopper) {
@@ -237,6 +218,10 @@ public class BehaviorTree3 : MonoBehaviour
     }
     protected Node SynchronizedTheftArc(GameObject thief)
     {
+        return new PossessionCoordinatorNode(thief, PossessedTheftArc(thief), UnpossessedTheftArc(thief), ThiefPosTrans(thief), ThiefUnposTrans(thief));
+    }
+    protected Node UnpossessedTheftArc(GameObject thief)
+    {
         return new Sequence(
                 new DecoratorForceStatus(
                     RunStatus.Success,
@@ -245,12 +230,44 @@ public class BehaviorTree3 : MonoBehaviour
                         RepeatedTheftArc(thief)
                     )
                 ),
+                new LeafInvoke(() => thief.GetComponent<NavMeshAgent>().ResetPath()),
+                new LeafInvoke(() => thief.GetComponent<NavMeshAgent>().Resume()),
                 mec(thief).Node_DropAll(),
                 new ForEach<GameObject>(StopGuard, GameObject.FindGameObjectsWithTag("Guard")),
                 mec(thief).Node_Escape(),
                 new LeafInvoke(() => thief.SetActive(false)),
                 new LeafInvoke(() => SuccessGameOver())
             );
+    }
+    protected Node PossessedTheftArc(GameObject thief)
+    {
+        return new DecoratorLoop(new LeafInvoke(delegate {
+            // Do nothing
+        }));
+    }
+    protected Node ThiefPosTrans(GameObject thief)
+    {
+        // Reset the navigation.
+        return new LeafInvoke(() => thief.GetComponent<NavMeshAgent>().ResetPath());
+    }
+    protected Node ThiefUnposTrans(GameObject thief)
+    {
+        // Tell the shopper to go shop at his table.
+        return new Sequence(
+                new LeafInvoke(() => thief.GetComponent<NavMeshAgent>().ResetPath()),
+                new LeafInvoke(() => thief.GetComponent<NavMeshAgent>().Resume()),
+                mec(thief).Node_Escape(),
+                new LeafInvoke(() => thief.SetActive(false)),
+                new LeafInvoke(() => SuccessGameOver2()),
+                new LeafWait(100)
+            );
+    }
+    protected RunStatus SuccessGameOver2()
+    {
+        SceneController sc = this.gameObject.GetComponent<SceneController>();
+        sc.endMessage = "That day, the thief decided not to steal the lamp...";
+        sc.state = SceneState.ENDING;
+        return RunStatus.Success;
     }
     protected RunStatus SuccessGameOver()
     {
