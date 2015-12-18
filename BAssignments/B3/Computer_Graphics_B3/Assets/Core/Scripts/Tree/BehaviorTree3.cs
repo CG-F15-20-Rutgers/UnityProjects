@@ -217,14 +217,14 @@ public class BehaviorTree3 : MonoBehaviour
     protected Node PossessedShopArc(GameObject shopper)
     {
         return new DecoratorLoop(new LeafInvoke(delegate {
-            float v = Input.GetAxis("Vertical");
+           /* float v = Input.GetAxis("Vertical");
             float h = Input.GetAxis("Horizontal");
             Vector3 target = shopper.transform.position + v * (Quaternion.Euler(0, h * 20, 0) * shopper.transform.forward);
             Vector3 targetDirection = shopper.transform.position + 10 * (Quaternion.Euler(0, h * 40, 0) * shopper.transform.forward);
             if (mec(shopper).Character.NavGoTo(target) == RunStatus.Failure)
                mec(shopper).Character.NavStop();
             if (mec(shopper).Character.NavTurn(targetDirection) == RunStatus.Failure)
-               mec(shopper).Character.NavOrientBehavior(OrientationBehavior.LookForward);
+               mec(shopper).Character.NavOrientBehavior(OrientationBehavior.LookForward);*/
         }));
     }
     protected Node ShopPosTrans(GameObject shopper) {

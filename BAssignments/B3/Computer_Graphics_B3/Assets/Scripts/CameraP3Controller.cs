@@ -204,7 +204,7 @@ public class CameraP3Controller : MonoBehaviour {
             else return;
 
             PossessionScript ps = player.GetComponent<PossessionScript>();
-            ps.IsPossessed = true;
+            ps.Possess();
 
             possessedCharacter = player;
             attachedRotation = player.transform.rotation;
@@ -222,7 +222,7 @@ public class CameraP3Controller : MonoBehaviour {
         GameObject retval = possessedCharacter;
         possessedCharacter = null;
         PossessionScript ps = retval.GetComponent<PossessionScript>();
-        ps.IsPossessed = false;
+        ps.Depossess();
         attachedLocation = transform.position;
         attachedRotation = transform.rotation;
         state = CameraState.DETACHING;
