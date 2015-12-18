@@ -38,7 +38,7 @@ public class PossessionScript : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-        if (IsPossessed)
+        if (IsPossessed && gameObject.CompareTag("Shopper") || gameObject.CompareTag("Thief"))
         {
             float Vertical = Input.GetAxis("Vertical");
             float Horizontal = Input.GetAxis("Horizontal");
