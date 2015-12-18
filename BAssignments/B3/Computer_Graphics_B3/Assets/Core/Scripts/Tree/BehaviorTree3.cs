@@ -169,7 +169,6 @@ public class BehaviorTree3 : MonoBehaviour
         int index = UnityEngine.Random.Range(0, shoppers.Length - 1);
         shoppers[index].tag = "Thief";
         shoppers[index].AddComponent<ThiefMeta>();
-        shoppers[index].transform.FindChild("Cube").gameObject.SetActive(true);
     }
 
     protected Node DirectShoppersNode()
@@ -195,11 +194,10 @@ public class BehaviorTree3 : MonoBehaviour
                     RepeatedShopArc(shopper)
                 )
             ),
-            mec(shopper).Node_DropAll(),
             new LeafInvoke(() => shopper.GetComponent<NavMeshAgent>().ResetPath()),
             new LeafInvoke(() => shopper.GetComponent<NavMeshAgent>().Resume()),
             mec(shopper).Node_Escape(),
-            new LeafInvoke(() => shopper.SetActive(false))
+            new LeafInvoke(() => shopper.gameObject.SetActive(false))
         );
     }
     protected Node PossessedShopArc(GameObject shopper)

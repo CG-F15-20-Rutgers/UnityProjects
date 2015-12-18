@@ -65,7 +65,7 @@ public class SceneController : MonoBehaviour {
                 if(opText < 0)
                 {
                     opText = 0;
-                    Application.LoadLevel(0);
+                    UnityEngine.SceneManagement.SceneManager.LoadScene("Menu");
                 }
                 break;
             default:

@@ -389,7 +389,7 @@ public class CharacterMecanim : MonoBehaviour
     {
         GameObject salesman = this.gameObject.GetComponent<ShopperMeta>().salesman;
         PossessionScript ps = salesman.GetComponent<PossessionScript>();
-        if (ps != null)
+        if (ps != null && ps.IsPossessed)
         {
             ps.waitForSpeak = true;
             if (!ps.canSpeak)

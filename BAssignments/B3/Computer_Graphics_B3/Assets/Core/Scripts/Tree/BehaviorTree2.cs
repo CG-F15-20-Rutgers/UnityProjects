@@ -194,7 +194,7 @@ public class BehaviorTree2 : MonoBehaviour
                 new LeafInvoke(() => shopper.GetComponent<NavMeshAgent>().ResetPath()),
                 new LeafInvoke(() => shopper.GetComponent<NavMeshAgent>().Resume()),
                 mec(shopper).Node_Escape(),
-                new LeafInvoke(() => shopper.SetActive(false))
+                new LeafInvoke(() => shopper.gameObject.SetActive(false))
             );
     }
     protected Node SynchronizedTheftArc(GameObject thief)
@@ -238,7 +238,6 @@ public class BehaviorTree2 : MonoBehaviour
     protected bool IsShopperActive(GameObject shopper)
     {
         bool active = shopper.GetComponent<ShopperMeta>().IsActiveForTree();
-        if (!active) Debug.Log("Inactive");
         return active;
     }
     protected Node ShopArc(GameObject shopper)
